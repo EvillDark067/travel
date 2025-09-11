@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Controle de Viagens</title>
+</head>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    padding: 40px;
+    width: 100%;
+    max-width: 800px;
+    margin: 20px;
+}
+
+.login-container {
+    max-width: 400px;
+    text-align: center;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #667eea;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.nav-btn {
+    padding: 8px 16px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+    background: #5a6fd8;
+    transform: translateY(-2px);
+}
+
+.nav-btn.active {
+    background: #764ba2;
+}
+
+.screen {
+    display: none;
+}
+
+.screen.active {
+    display: block;
+}
+
+h1, h2 {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: 500;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.btn {
+    background: #667eea;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin: 5px;
+}
+
+.btn:hover {
+    background: #5a6fd8;
+    transform: translateY(-2px);
+}
+
+.btn-success {
+    background: #28a745;
+}
+
+.btn-success:hover {
+    background: #218838;
+}
+
+.btn-danger {
+    background: #dc3545;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+.btn-secondary {
+    background: #6c757d;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.trip-card {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+
+.trip-card:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+}
+
+.trip-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-label {
+    font-weight: bold;
+    color: #667eea;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.info-value {
+    color: #333;
+    font-size: 16px;
+}
+
+.search-filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.no-data {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 40px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-transit {
+    background: #ffc107;
+    color: #856404;
+}
+
+.status-finished {
+    background: #28a745;
+    color: white;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+        margin: 10px;
+    }
+    
+    .nav-buttons {
+        flex-wrap: wrap;
+    }
+    
+    .nav-btn {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .search-filters {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+// Dados do sistema
+let drivers = JSON.parse(localStorage.getItem('drivers')) || [];
+let vehicles = JSON.parse(localStorage.getItem('vehicles')) || [];
+let trips = JSON.parse(localStorage.getItem('trips')) || [];
+let currentUser = null;
+
+// Função de login
+function login() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    
+    if (username === 'admin' && password === 'transp123') {
+        currentUser = username;
+        document.getElementById('loginScreen').classList.remove('active');
+        document.getElementById('driversScreen').classList.add('active');
+        loadDrivers();
+        updateNavigation();
+    } else {
+        alert('Usuário ou senha incorretos!');
+    }
+}
+
+// Função para mostrar tela de login
+function showLogin() {
+    hideAllScreens();
+    document.getElementById('loginScreen').classList.add('active');
+}
+
+// Função de logout
+function logout() {
+    currentUser = null;
+    showScreen('trips'); // Voltar para nova viagem
+    updateNavigation();
+    // Limpar campos de login
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+}
+
+// Navegação entre telas
+function showScreen(screenName) {
+    hideAllScreens();
+    document.getElementById(screenName + 'Screen').classList.add('active');
+    
+    // Atualizar dados ao entrar na tela
+    switch(screenName) {
+        case 'drivers':
+            loadDrivers();
+            break;
+        case 'vehicles':
+            loadVehicles();
+            break;
+        case 'trips':
+            loadTripForm();
+            break;
+        case 'transit':
+            loadTransitTrips();
+            break;
+        case 'finished':
+            loadFinishedTrips();
+            break;
+    }
+    
+    updateNavigation();
+}
+
+function hideAllScreens() {
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(screen => screen.classList.remove('active'));
+}
+
+function updateNavigation() {
+    const navButtons = document.querySelectorAll('.nav-btn');
+    navButtons.forEach(btn => btn.classList.remove('active'));
+    
+    // Sempre mostrar o header
+    document.querySelector('.header').style.display = 'flex';
+    
+    // Mostrar/ocultar botões baseado no login
+    const adminButtons = document.querySelectorAll('.admin-only');
+    const loginButton = document.getElementById('loginButton');
+    const logoutButton = document.getElementById('logoutButton');
+    
+    if (currentUser) {
+        adminButtons.forEach(btn => btn.style.display = 'inline-block');
+        loginButton.style.display = 'none';
+        logoutButton.style.display = 'inline-block';
+    } else {
+        adminButtons.forEach(btn => btn.style.display = 'none');
+        loginButton.style.display = 'inline-block';
+        logoutButton.style.display = 'none';
+    }
+}
+
+// Gerenciamento de motoristas
+function addDriver() {
+    const name = document.getElementById('driverName').value;
+    const cnh = document.getElementById('driverCNH').value;
+    const email = document.getElementById('driverEmail').value;
+    const phone = document.getElementById('driverPhone').value;
+    
+    if (!name || !cnh || !email || !phone) {
+        alert('Preencha todos os campos!');
+        return;
+    }
+    
+    const driver = {
+        id: Date.now(),
+        name,
+        cnh,
+        email,
+        phone
+    };
+    
+    drivers.push(driver);
+    localStorage.setItem('drivers', JSON.stringify(drivers));
+    
+    document.getElementById('driverForm').reset();
+    loadDrivers();
+    alert('Motorista cadastrado com sucesso!');
+}
+
+function loadDrivers() {
+    const list = document.getElementById('driversList');
+    list.innerHTML = '';
+    
+    if (drivers.length === 0) {
+        list.innerHTML = '<div class="no-data">Nenhum motorista cadastrado</div>';
+        return;
+    }
+    
+    drivers.forEach(driver => {
+        const card = document.createElement('div');
+        card.className = 'trip-card';
+        card.innerHTML = `
+            <div class="trip-info">
+                <div class="info-item">
+                    <span class="info-label">Nome</span>
+                    <span class="info-value">${driver.name}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">CNH</span>
+                    <span class="info-value">${driver.cnh}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Email</span>
+                    <span class="info-value">${driver.email}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Telefone</span>
+                    <span class="info-value">${driver.phone}</span>
+                </div>
+            </div>
+            <button class="btn btn-danger" onclick="removeDriver(${driver.id})">Remover</button>
+        `;
+        list.appendChild(card);
+    });
+}
+
+function removeDriver(id) {
+    if (confirm('Tem certeza que deseja remover este motorista?')) {
+        drivers = drivers.filter(driver => driver.id !== id);
+        localStorage.setItem('drivers', JSON.stringify(drivers));
+        loadDrivers();
+    }
+}
+
+// Gerenciamento de veículos
+function addVehicle() {
+    const model = document.getElementById('vehicleModel').value;
+    const brand = document.getElementById('vehicleBrand').value;
+    const year = document.getElementById('vehicleYear').value;
+    const plate = document.getElementById('vehiclePlate').value;
+    
+    if (!model || !brand || !year || !plate) {
+        alert('Preencha todos os campos!');
+        return;
+    }
+    
+    const vehicle = {
+        id: Date.now(),
+        model,
+        brand,
+        year: parseInt(year),
+        plate: plate.toUpperCase()
+    };
+    
+    vehicles.push(vehicle);
+    localStorage.setItem('vehicles', JSON.stringify(vehicles));
+    
+    document.getElementById('vehicleForm').reset();
+    loadVehicles();
+    alert('Veículo cadastrado com sucesso!');
+}
+
+function loadVehicles() {
+    const list = document.getElementById('vehiclesList');
+    list.innerHTML = '';
+    
+    if (vehicles.length === 0) {
+        list.innerHTML = '<div class="no-data">Nenhum veículo cadastrado</div>';
+        return;
+    }
+    
+    vehicles.forEach(vehicle => {
+        const card = document.createElement('div');
+        card.className = 'trip-card';
+        card.innerHTML = `
+            <div class="trip-info">
+                <div class="info-item">
+                    <span class="info-label">Modelo</span>
+                    <span class="info-value">${vehicle.model}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Marca</span>
+                    <span class="info-value">${vehicle.brand}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Ano</span>
+                    <span class="info-value">${vehicle.year}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Placa</span>
+                    <span class="info-value">${vehicle.plate}</span>
+                </div>
+            </div>
+            <button class="btn btn-danger" onclick="removeVehicle(${vehicle.id})">Remover</button>
+        `;
+        list.appendChild(card);
+    });
+}
+
+function removeVehicle(id) {
+    if (confirm('Tem certeza que deseja remover este veículo?')) {
+        vehicles = vehicles.filter(vehicle => vehicle.id !== id);
+        localStorage.setItem('vehicles', JSON.stringify(vehicles));
+        loadVehicles();
+    }
+}
+
+// Gerenciamento de viagens
+function loadTripForm() {
+    const driverSelect = document.getElementById('tripDriver');
+    const vehicleSelect = document.getElementById('tripVehicle');
+    
+    // Carregar motoristas
+    driverSelect.innerHTML = '<option value="">Selecione um motorista</option>';
+    drivers.forEach(driver => {
+        driverSelect.innerHTML += `<option value="${driver.id}">${driver.name}</option>`;
+    });
+    
+    // Carregar veículos
+    vehicleSelect.innerHTML = '<option value="">Selecione um veículo</option>';
+    vehicles.forEach(vehicle => {
+        vehicleSelect.innerHTML += `<option value="${vehicle.id}">${vehicle.brand} ${vehicle.model} - ${vehicle.plate}</option>`;
+    });
+}
+
+function startTrip() {
+    const driverId = document.getElementById('tripDriver').value;
+    const vehicleId = document.getElementById('tripVehicle').value;
+    const initialKm = document.getElementById('initialKm').value;
+    const destination = document.getElementById('destination').value;
+    
+    if (!driverId || !vehicleId || !initialKm || !destination) {
+        alert('Preencha todos os campos!');
+        return;
+    }
+    
+    const driver = drivers.find(d => d.id == driverId);
+    const vehicle = vehicles.find(v => v.id == vehicleId);
+    
+    const trip = {
+        id: Date.now(),
+        driver: driver,
+        vehicle: vehicle,
+        initialKm: parseFloat(initialKm),
+        destination: destination,
+        startDate: new Date().toLocaleString('pt-BR'),
+        status: 'transit'
+    };
+    
+    trips.push(trip);
+    localStorage.setItem('trips', JSON.stringify(trips));
+    
+    document.getElementById('tripForm').reset();
+    alert('Viagem iniciada com sucesso!');
+    showScreen('transit');
+}
+
+function loadTransitTrips() {
+    const list = document.getElementById('transitList');
+    list.innerHTML = '';
+    
+    const transitTrips = trips.filter(trip => trip.status === 'transit');
+    
+    if (transitTrips.length === 0) {
+        list.innerHTML = '<div class="no-data">Nenhuma viagem em trânsito</div>';
+        return;
+    }
+    
+    transitTrips.forEach(trip => {
+        const card = document.createElement('div');
+        card.className = 'trip-card';
+        card.innerHTML = `
+            <div class="trip-info">
+                <div class="info-item">
+                    <span class="info-label">Motorista</span>
+                    <span class="info-value">${trip.driver.name}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Veículo</span>
+                    <span class="info-value">${trip.vehicle.brand} ${trip.vehicle.model}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Placa</span>
+                    <span class="info-value">${trip.vehicle.plate}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Destino</span>
+                    <span class="info-value">${trip.destination}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">KM Inicial</span>
+                    <span class="info-value">${trip.initialKm}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Data/Hora Saída</span>
+                    <span class="info-value">${trip.startDate}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Status</span>
+                    <span class="info-value"><span class="status-badge status-transit">Em Trânsito</span></span>
+                </div>
+            </div>
+            <div style="margin-top: 15px;">
+                <input type="number" id="finalKm_${trip.id}" placeholder="KM Final (mín: ${trip.initialKm})" min="${trip.initialKm}" step="0.1" style="width: 250px; margin-right: 10px;" oninput="validateFinalKm(${trip.id}, ${trip.initialKm})">
+                <button class="btn btn-success" onclick="finishTrip(${trip.id})">Encerrar Viagem</button>
+                <div id="kmWarning_${trip.id}" style="color: #dc3545; font-size: 14px; margin-top: 5px; display: none;">
+                    ⚠️ KM final deve ser maior que ${trip.initialKm} km
+                </div>
+            </div>
+        `;
+        list.appendChild(card);
+    });
+}
+
+function validateFinalKm(tripId, initialKm) {
+    const finalKmInput = document.getElementById(`finalKm_${tripId}`);
+    const warningDiv = document.getElementById(`kmWarning_${tripId}`);
+    const finalKmValue = parseFloat(finalKmInput.value);
+    
+    if (finalKmInput.value && finalKmValue < initialKm) {
+        warningDiv.style.display = 'block';
+        finalKmInput.style.borderColor = '#dc3545';
+        finalKmInput.style.backgroundColor = '#fff5f5';
+    } else {
+        warningDiv.style.display = 'none';
+        finalKmInput.style.borderColor = '#e0e0e0';
+        finalKmInput.style.backgroundColor = 'white';
+    }
+}
+
+function finishTrip(tripId) {
+    const finalKm = document.getElementById(`finalKm_${tripId}`).value;
+    
+    if (!finalKm) {
+        alert('⚠️ Por favor, informe a quilometragem final para encerrar a viagem!');
+        return;
+    }
+    
+    const trip = trips.find(t => t.id === tripId);
+    const finalKmValue = parseFloat(finalKm);
+    
+    if (finalKmValue < trip.initialKm) {
+        alert(`❌ ERRO: A quilometragem final (${finalKmValue} km) não pode ser menor que a inicial (${trip.initialKm} km)!\n\nPor favor, verifique o valor e digite uma quilometragem maior que ${trip.initialKm} km.`);
+        // Limpar o campo para o usuário digitar novamente
+        document.getElementById(`finalKm_${tripId}`).value = '';
+        document.getElementById(`finalKm_${tripId}`).focus();
+        return;
+    }
+    
+    if (finalKmValue === trip.initialKm) {
+        alert(`⚠️ ATENÇÃO: A quilometragem final (${finalKmValue} km) é igual à inicial (${trip.initialKm} km)!\n\nIsso significa que o veículo não rodou nenhum quilômetro. Tem certeza que está correto?`);
+        if (!confirm('Deseja continuar mesmo assim?')) {
+            return;
+        }
+    }
+    
+    trip.finalKm = finalKmValue;
+    trip.endDate = new Date().toLocaleString('pt-BR');
+    trip.status = 'finished';
+    trip.totalKm = trip.finalKm - trip.initialKm;
+    
+    localStorage.setItem('trips', JSON.stringify(trips));
+    loadTransitTrips();
+    alert(`✅ Viagem encerrada com sucesso!\n\nTotal percorrido: ${trip.totalKm} km`);
+}
+
+function loadFinishedTrips() {
+    displayFinishedTrips(trips.filter(trip => trip.status === 'finished'));
+}
+
+function displayFinishedTrips(tripsToShow) {
+    const list = document.getElementById('finishedList');
+    list.innerHTML = '';
+    
+    if (tripsToShow.length === 0) {
+        list.innerHTML = '<div class="no-data">Nenhuma viagem encerrada encontrada</div>';
+        return;
+    }
+    
+    tripsToShow.forEach(trip => {
+        const card = document.createElement('div');
+        card.className = 'trip-card';
+        card.innerHTML = `
+            <div class="trip-info">
+                <div class="info-item">
+                    <span class="info-label">Motorista</span>
+                    <span class="info-value">${trip.driver.name}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Veículo</span>
+                    <span class="info-value">${trip.vehicle.brand} ${trip.vehicle.model}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Placa</span>
+                    <span class="info-value">${trip.vehicle.plate}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Destino</span>
+                    <span class="info-value">${trip.destination}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">KM Inicial</span>
+                    <span class="info-value">${trip.initialKm}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">KM Final</span>
+                    <span class="info-value">${trip.finalKm}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Total KM</span>
+                    <span class="info-value">${trip.totalKm}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Data Saída</span>
+                    <span class="info-value">${trip.startDate}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Data Chegada</span>
+                    <span class="info-value">${trip.endDate}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Status</span>
+                    <span class="info-value"><span class="status-badge status-finished">Encerrada</span></span>
+                </div>
+            </div>
+        `;
+        list.appendChild(card);
+    });
+}
+
+function searchTrips() {
+    const driverFilter = document.getElementById('searchDriver').value.toLowerCase();
+    const vehicleFilter = document.getElementById('searchVehicle').value.toLowerCase();
+    const dateFilter = document.getElementById('searchDate').value;
+    
+    let filteredTrips = trips.filter(trip => trip.status === 'finished');
+    
+    if (driverFilter) {
+        filteredTrips = filteredTrips.filter(trip => 
+            trip.driver.name.toLowerCase().includes(driverFilter)
+        );
+    }
+    
+    if (vehicleFilter) {
+        filteredTrips = filteredTrips.filter(trip => 
+            trip.vehicle.brand.toLowerCase().includes(vehicleFilter) ||
+            trip.vehicle.model.toLowerCase().includes(vehicleFilter) ||
+            trip.vehicle.plate.toLowerCase().includes(vehicleFilter)
+        );
+    }
+    
+    if (dateFilter) {
+        filteredTrips = filteredTrips.filter(trip => 
+            trip.startDate.includes(dateFilter.split('-').reverse().join('/'))
+        );
+    }
+    
+    displayFinishedTrips(filteredTrips);
+}
+
+function clearSearch() {
+    document.getElementById('searchDriver').value = '';
+    document.getElementById('searchVehicle').value = '';
+    document.getElementById('searchDate').value = '';
+    loadFinishedTrips();
+}
+
+function downloadCSV() {
+    const finishedTrips = trips.filter(trip => trip.status === 'finished');
+    
+    if (finishedTrips.length === 0) {
+        alert('Não há viagens encerradas para exportar!');
+        return;
+    }
+    
+    let csv = 'Motorista,CNH,Veículo,Placa,Destino,KM Inicial,KM Final,Total KM,Data Saída,Data Chegada\n';
+    
+    finishedTrips.forEach(trip => {
+        csv += `"${trip.driver.name}","${trip.driver.cnh}","${trip.vehicle.brand} ${trip.vehicle.model}","${trip.vehicle.plate}","${trip.destination}","${trip.initialKm}","${trip.finalKm}","${trip.totalKm}","${trip.startDate}","${trip.endDate}"\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `relatorio_viagens_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Gerar anos para o select
+function generateYearOptions() {
+    const yearSelect = document.getElementById('vehicleYear');
+    for (let year = 2030; year >= 1990; year--) {
+        yearSelect.innerHTML += `<option value="${year}">${year}</option>`;
+    }
+}
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', function() {
+    generateYearOptions();
+    
+    // Iniciar na tela de nova viagem (sem login)
+    showScreen('trips');
+    
+    // Enter no login
+    document.getElementById('password').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            login();
+        }
+    });
+});
+</script>
+
+<body>
+    <div class="container">
+        <!-- Header de Navegação -->
+        <div class="header">
+            <div class="logo">🚗 Sistema de Viagens</div>
+            <div class="nav-buttons">
+                <button class="nav-btn admin-only" onclick="showScreen('drivers')" style="display: none;">Motoristas</button>
+                <button class="nav-btn admin-only" onclick="showScreen('vehicles')" style="display: none;">Veículos</button>
+                <button class="nav-btn" onclick="showScreen('trips')">Nova Viagem</button>
+                <button class="nav-btn" onclick="showScreen('transit')">Em Trânsito</button>
+                <button class="nav-btn" onclick="showScreen('finished')">Encerradas</button>
+                <button id="loginButton" class="nav-btn" onclick="showLogin()">Cadastrar</button>
+                <button id="logoutButton" class="nav-btn btn-secondary" onclick="logout()" style="display: none;">Sair</button>
+            </div>
+        </div>
+
+        <!-- Tela de Login -->
+        <div id="loginScreen" class="screen">
+            <div class="login-container">
+                <h1>🚗 Sistema de Controle de Viagens</h1>
+                <div class="form-group">
+                    <label for="username">Usuário:</label>
+                    <input type="text" id="username" placeholder="Digite seu usuário">
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha:</label>
+                    <input type="password" id="password" placeholder="Digite sua senha">
+                </div>
+                <button class="btn" onclick="login()">Entrar</button>
+            </div>
+        </div>
+
+        <!-- Tela de Cadastro de Motoristas -->
+        <div id="driversScreen" class="screen">
+            <h2>👨‍💼 Cadastro de Motoristas</h2>
+            <form id="driverForm" onsubmit="event.preventDefault(); addDriver();">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="driverName">Nome Completo:</label>
+                        <input type="text" id="driverName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="driverCNH">CNH:</label>
+                        <input type="text" id="driverCNH" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="driverEmail">Email:</label>
+                        <input type="email" id="driverEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="driverPhone">Telefone:</label>
+                        <input type="tel" id="driverPhone" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn">Cadastrar Motorista</button>
+            </form>
+            
+            <h3 style="margin-top: 40px;">Motoristas Cadastrados</h3>
+            <div id="driversList"></div>
+        </div>
+
+        <!-- Tela de Cadastro de Veículos -->
+        <div id="vehiclesScreen" class="screen">
+            <h2>🚙 Cadastro de Veículos</h2>
+            <form id="vehicleForm" onsubmit="event.preventDefault(); addVehicle();">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="vehicleModel">Modelo:</label>
+                        <input type="text" id="vehicleModel" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="vehicleBrand">Marca:</label>
+                        <input type="text" id="vehicleBrand" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="vehicleYear">Ano:</label>
+                        <select id="vehicleYear" required>
+                            <option value="">Selecione o ano</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="vehiclePlate">Placa:</label>
+                        <input type="text" id="vehiclePlate" placeholder="ABC-1234" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn">Cadastrar Veículo</button>
+            </form>
+            
+            <h3 style="margin-top: 40px;">Veículos Cadastrados</h3>
+            <div id="vehiclesList"></div>
+        </div>
+
+        <!-- Tela de Nova Viagem -->
+        <div id="tripsScreen" class="screen">
+            <h2>🗺️ Registrar Nova Viagem</h2>
+            <form id="tripForm" onsubmit="event.preventDefault(); startTrip();">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tripDriver">Motorista:</label>
+                        <select id="tripDriver" required>
+                            <option value="">Selecione um motorista</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tripVehicle">Veículo:</label>
+                        <select id="tripVehicle" required>
+                            <option value="">Selecione um veículo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="initialKm">Quilometragem Inicial:</label>
+                        <input type="number" id="initialKm" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="destination">Destino:</label>
+                        <input type="text" id="destination" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn">Iniciar Viagem</button>
+            </form>
+        </div>
+
+        <!-- Tela de Viagens em Trânsito -->
+        <div id="transitScreen" class="screen">
+            <h2>🚛 Viagens em Trânsito</h2>
+            <div id="transitList"></div>
+        </div>
+
+        <!-- Tela de Viagens Encerradas -->
+        <div id="finishedScreen" class="screen">
+            <h2>✅ Viagens Encerradas</h2>
+            
+            <div class="search-filters">
+                <div class="form-group">
+                    <label for="searchDriver">Filtrar por Motorista:</label>
+                    <input type="text" id="searchDriver" placeholder="Nome do motorista">
+                </div>
+                <div class="form-group">
+                    <label for="searchVehicle">Filtrar por Veículo:</label>
+                    <input type="text" id="searchVehicle" placeholder="Marca, modelo ou placa">
+                </div>
+                <div class="form-group">
+                    <label for="searchDate">Filtrar por Data:</label>
+                    <input type="date" id="searchDate">
+                </div>
+                <div class="form-group" style="display: flex; align-items: end; gap: 10px;">
+                    <button class="btn" onclick="searchTrips()">Buscar</button>
+                    <button class="btn btn-secondary" onclick="clearSearch()">Limpar</button>
+                    <button class="btn btn-success" onclick="downloadCSV()">📊 Baixar CSV</button>
+                </div>
+            </div>
+            
+            <div id="finishedList"></div>
+        </div>
+    </div>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97d37810a030f90d',t:'MTc1NzU1NDk1MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
