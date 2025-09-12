@@ -1,795 +1,255 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Controle de Estoque</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
-    <style>
-        .fade-in {
-            animation: fadeIn 0.3s ease-in;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .slide-in {
-            animation: slideIn 0.3s ease-out;
-        }
-        @keyframes slideIn {
-            from { transform: translateX(-100%); }
-            to { transform: translateX(0); }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Controle de Estoque</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
 </head>
 <body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen font-sans">
-    <!-- Tela de Login -->
-    <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md fade-in">
-            <div class="text-center mb-8">
-                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i data-lucide="package" class="w-8 h-8 text-blue-600"></i>
-                </div>
-                <h1 class="text-2xl font-bold text-gray-800">Sistema de Estoque</h1>
-                <p class="text-gray-600 mt-2">Faça login para continuar</p>
-            </div>
-            
-            <form id="loginForm" class="space-y-6">
-                <div>
-                    <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Usuário</label>
-                    <input type="text" id="username" value="lucas" 
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-                </div>
-                
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Senha</label>
-                    <input type="password" id="password" value="1234"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-                </div>
-                
-                <button type="submit" 
-                        class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                    Entrar
-                </button>
-            </form>
-            
-            <div id="loginError" class="mt-4 p-3 bg-red-100 text-red-700 rounded-lg hidden">
-                Usuário ou senha incorretos
-            </div>
+  <!-- Tela de Login -->
+  <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md fade-in">
+      <div class="text-center mb-8">
+        <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i data-lucide="package" class="w-8 h-8 text-blue-600"></i>
         </div>
-    </div>
-
-    <!-- Dashboard Principal -->
-    <div id="dashboard" class="hidden">
-        <!-- Header -->
-        <header class="bg-white shadow-sm border-b border-gray-200">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center h-16">
-                    <div class="flex items-center">
-                        <div class="bg-blue-100 w-10 h-10 rounded-lg flex items-center justify-center mr-3">
-                            <i data-lucide="package" class="w-6 h-6 text-blue-600"></i>
-                        </div>
-                        <h1 class="text-xl font-semibold text-gray-800">Controle de Estoque</h1>
-                    </div>
-                    
-                    <div class="flex items-center space-x-4">
-                        <span class="text-sm text-gray-600">Olá, <span id="currentUser">lucas</span></span>
-                        <button id="logoutBtn" class="text-gray-500 hover:text-gray-700 transition-colors">
-                            <i data-lucide="log-out" class="w-5 h-5"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <!-- Navegação -->
-        <nav class="bg-white shadow-sm">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex space-x-8">
-                    <button class="nav-btn active py-4 px-2 border-b-2 border-blue-500 text-blue-600 font-medium" data-section="estoque">
-                        <i data-lucide="package" class="w-4 h-4 inline mr-2"></i>Estoque
-                    </button>
-                    <button class="nav-btn py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium" data-section="usuarios">
-                        <i data-lucide="users" class="w-4 h-4 inline mr-2"></i>Usuários
-                    </button>
-                </div>
-            </div>
-        </nav>
-
-        <!-- Conteúdo Principal -->
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <!-- Seção Estoque -->
-            <div id="estoqueSection" class="section-content">
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">Gerenciar Estoque</h2>
-                        <div class="flex flex-col sm:flex-row gap-3">
-                            <button id="addItemBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center">
-                                <i data-lucide="plus" class="w-4 h-4 mr-2"></i>Adicionar Item
-                            </button>
-                            <button id="exportCsvBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
-                                <i data-lucide="download" class="w-4 h-4 mr-2"></i>Exportar CSV
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Tabela de Estoque -->
-                    <div class="overflow-x-auto">
-                        <table class="w-full table-auto">
-                            <thead>
-                                <tr class="bg-gray-50">
-                                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Código</th>
-                                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Produto</th>
-                                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Categoria</th>
-                                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Quantidade</th>
-                                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Preço</th>
-                                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="estoqueTable" class="divide-y divide-gray-200">
-                                <!-- Itens serão inseridos aqui via JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Seção Usuários -->
-            <div id="usuariosSection" class="section-content hidden">
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">Gerenciar Usuários</h2>
-                        <div class="flex flex-col sm:flex-row gap-3">
-                            <button id="addUserBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center">
-                                <i data-lucide="user-plus" class="w-4 h-4 mr-2"></i>Novo Usuário
-                            </button>
-                            <button id="changePasswordBtn" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors flex items-center">
-                                <i data-lucide="key" class="w-4 h-4 mr-2"></i>Alterar Senha
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Lista de Usuários -->
-                    <div class="grid gap-4">
-                        <div id="usersList">
-                            <!-- Usuários serão inseridos aqui via JavaScript -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Modal Adicionar Item -->
-    <div id="addItemModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Adicionar Novo Item</h3>
-            <form id="addItemForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Código</label>
-                    <input type="text" id="itemCodigo" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Produto</label>
-                    <input type="text" id="itemProduto" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Categoria</label>
-                    <select id="itemCategoria" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Selecione uma categoria</option>
-                        <option value="Eletrônicos">Eletrônicos</option>
-                        <option value="Roupas">Roupas</option>
-                        <option value="Casa">Casa</option>
-                        <option value="Livros">Livros</option>
-                        <option value="Esportes">Esportes</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Quantidade</label>
-                    <input type="number" id="itemQuantidade" required min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Preço (R$)</label>
-                    <input type="number" id="itemPreco" required min="0" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
-                <div class="flex gap-3 pt-4">
-                    <button type="submit" class="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors">
-                        Adicionar
-                    </button>
-                    <button type="button" id="cancelAddItem" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition-colors">
-                        Cancelar
-                    </button>
-                </div>
-            </form>
+        <h1 class="text-2xl font-bold text-gray-800">Sistema de Estoque</h1>
+        <p class="text-gray-600 mt-2">Faça login para continuar</p>
+      </div>
+      
+      <form id="loginForm" class="space-y-6">
+        <div>
+          <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Usuário</label>
+          <input type="text" id="username" value="lucas" class="w-full px-4 py-3 border rounded-lg">
         </div>
-    </div>
-
-    <!-- Modal Novo Usuário -->
-    <div id="addUserModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Criar Novo Usuário</h3>
-            <form id="addUserForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nome de Usuário</label>
-                    <input type="text" id="newUsername" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Senha</label>
-                    <input type="password" id="newPassword" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Confirmar Senha</label>
-                    <input type="password" id="confirmPassword" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
-                <div class="flex gap-3 pt-4">
-                    <button type="submit" class="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors">
-                        Criar Usuário
-                    </button>
-                    <button type="button" id="cancelAddUser" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition-colors">
-                        Cancelar
-                    </button>
-                </div>
-            </form>
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Senha</label>
+          <input type="password" id="password" value="1234" class="w-full px-4 py-3 border rounded-lg">
         </div>
+        <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg">Entrar</button>
+      </form>
+      <div id="loginError" class="mt-4 p-3 bg-red-100 text-red-700 rounded-lg hidden">
+        Usuário ou senha incorretos
+      </div>
     </div>
+  </div>
 
-    <!-- Modal Alterar Senha -->
-    <div id="changePasswordModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Alterar Senha</h3>
-            <form id="changePasswordForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Senha Atual</label>
-                    <input type="password" id="currentPassword" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nova Senha</label>
-                    <input type="password" id="newPasswordChange" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Confirmar Nova Senha</label>
-                    <input type="password" id="confirmPasswordChange" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
-                <div class="flex gap-3 pt-4">
-                    <button type="submit" class="flex-1 bg-orange-600 text-white py-2 rounded-lg hover:bg-orange-700 transition-colors">
-                        Alterar Senha
-                    </button>
-                    <button type="button" id="cancelChangePassword" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition-colors">
-                        Cancelar
-                    </button>
-                </div>
-            </form>
+  <!-- Dashboard -->
+  <div id="dashboard" class="hidden">
+    <header class="bg-white shadow-sm border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
+        <h1 class="text-xl font-semibold text-gray-800">Controle de Estoque</h1>
+        <div class="flex items-center space-x-4">
+          <span class="text-sm text-gray-600">Olá, <span id="currentUser">lucas</span></span>
+          <button id="logoutBtn" class="text-gray-500 hover:text-gray-700"><i data-lucide="log-out" class="w-5 h-5"></i></button>
         </div>
-    </div>
+      </div>
+    </header>
 
-    <script>
-        // Inicializar ícones do Lucide
-        lucide.createIcons();
-
-        // Dados simulados em memória
-        let usuarios = [
-            { username: 'lucas', password: '1234', role: 'admin' },
-            { username: 'maria', password: 'senha123', role: 'user' },
-            { username: 'joao', password: 'abc123', role: 'user' }
-        ];
-
-        let estoque = [
-            { codigo: 'EL001', produto: 'Smartphone Samsung', categoria: 'Eletrônicos', quantidade: 15, preco: 899.99 },
-            { codigo: 'RO001', produto: 'Camiseta Polo', categoria: 'Roupas', quantidade: 30, preco: 59.90 },
-            { codigo: 'CA001', produto: 'Mesa de Jantar', categoria: 'Casa', quantidade: 5, preco: 450.00 },
-            { codigo: 'LI001', produto: 'Livro JavaScript', categoria: 'Livros', quantidade: 20, preco: 89.90 }
-        ];
-
-        let usuarioLogado = null;
-
-        // Função para fazer login - verifica usuário e senha
-        function fazerLogin(username, password) {
-            const usuario = usuarios.find(u => u.username === username && u.password === password);
-            if (usuario) {
-                usuarioLogado = usuario;
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-                document.getElementById('currentUser').textContent = usuario.username;
-                carregarEstoque();
-                carregarUsuarios();
-                return true;
-            }
-            return false;
-        }
-
-        // Função para fazer logout - volta para tela de login
-        function fazerLogout() {
-            usuarioLogado = null;
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('loginScreen').classList.remove('hidden');
-            document.getElementById('loginError').classList.add('hidden');
-        }
-
-        // Função para carregar e exibir itens do estoque na tabela
-        function carregarEstoque() {
-            const tbody = document.getElementById('estoqueTable');
-            tbody.innerHTML = '';
-            
-            estoque.forEach((item, index) => {
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-50';
-                row.innerHTML = `
-                    <td class="px-4 py-3 text-sm text-gray-900">${item.codigo}</td>
-                    <td class="px-4 py-3 text-sm text-gray-900">${item.produto}</td>
-                    <td class="px-4 py-3 text-sm text-gray-600">${item.categoria}</td>
-                    <td class="px-4 py-3 text-sm text-gray-900">${item.quantidade}</td>
-                    <td class="px-4 py-3 text-sm text-gray-900">R$ ${item.preco.toFixed(2)}</td>
-                    <td class="px-4 py-3 text-sm">
-                        <button onclick="removerItem(${index})" class="text-red-600 hover:text-red-800 transition-colors">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-            lucide.createIcons();
-        }
-
-        // Função para adicionar novo item ao estoque
-        function adicionarItem(codigo, produto, categoria, quantidade, preco) {
-            const novoItem = {
-                codigo: codigo,
-                produto: produto,
-                categoria: categoria,
-                quantidade: parseInt(quantidade),
-                preco: parseFloat(preco)
-            };
-            estoque.push(novoItem);
-            carregarEstoque();
-        }
-
-        // Função para remover item do estoque pelo índice
-        function removerItem(index) {
-            if (confirm('Tem certeza que deseja remover este item?')) {
-                estoque.splice(index, 1);
-                carregarEstoque();
-            }
-        }
-
-        // Função para exportar dados do estoque em formato CSV
-        function exportarCSV() {
-            const headers = ['Código', 'Produto', 'Categoria', 'Quantidade', 'Preço'];
-            const csvContent = [
-                headers.join(','),
-                ...estoque.map(item => [
-                    item.codigo,
-                    `"${item.produto}"`,
-                    item.categoria,
-                    item.quantidade,
-                    item.preco.toFixed(2)
-                ].join(','))
-            ].join('\n');
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', 'estoque.csv');
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // Função para carregar e exibir lista de usuários
-       async function carregarUsuarios() {
-    const usersList = document.getElementById('usersList');
-    usersList.innerHTML = '';
-
-    const usuarios = await carregarUsuariosSupabase();
-
-    usuarios.forEach(usuario => {
-        const userCard = document.createElement('div');
-        userCard.className = 'bg-gray-50 rounded-lg p-4 flex justify-between items-center';
-        userCard.innerHTML = `
-            <div>
-                <h4 class="font-medium text-gray-800">${usuario.username}</h4>
-                <p class="text-sm text-gray-600">Perfil: ${usuario.role}</p>
+    <main class="max-w-7xl mx-auto px-4 py-8">
+      <!-- Seção Estoque -->
+      <section id="estoqueSection">
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold">Gerenciar Estoque</h2>
+            <div class="flex gap-3">
+              <button id="addItemBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg">Adicionar Item</button>
+              <button id="exportCsvBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Exportar CSV</button>
             </div>
-            <button onclick="removerUsuario('${usuario.id}')" class="text-red-600 hover:text-red-800 transition-colors">
-                <i data-lucide="user-minus" class="w-4 h-4"></i>
-            </button>
+          </div>
+          <table class="w-full table-auto">
+            <thead>
+              <tr class="bg-gray-50">
+                <th class="px-4 py-2 text-left">Código</th>
+                <th class="px-4 py-2 text-left">Produto</th>
+                <th class="px-4 py-2 text-left">Categoria</th>
+                <th class="px-4 py-2 text-left">Quantidade</th>
+                <th class="px-4 py-2 text-left">Preço</th>
+                <th class="px-4 py-2 text-left">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="estoqueTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Seção Usuários -->
+      <section id="usuariosSection">
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold">Gerenciar Usuários</h2>
+            <button id="addUserBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg">Novo Usuário</button>
+          </div>
+          <div id="usersList" class="grid gap-4"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal Adicionar Item -->
+  <div id="addItemModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+    <div class="bg-white rounded-xl p-6 w-full max-w-md">
+      <h3 class="text-lg font-semibold mb-4">Adicionar Novo Item</h3>
+      <form id="addItemForm" class="space-y-4">
+        <input type="text" id="itemCodigo" placeholder="Código" required class="w-full border px-3 py-2 rounded-lg">
+        <input type="text" id="itemProduto" placeholder="Produto" required class="w-full border px-3 py-2 rounded-lg">
+        <input type="text" id="itemCategoria" placeholder="Categoria" required class="w-full border px-3 py-2 rounded-lg">
+        <input type="number" id="itemQuantidade" placeholder="Quantidade" required class="w-full border px-3 py-2 rounded-lg">
+        <input type="number" id="itemPreco" placeholder="Preço" step="0.01" required class="w-full border px-3 py-2 rounded-lg">
+        <button type="submit" class="w-full bg-green-600 text-white py-2 rounded-lg">Adicionar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Adicionar Usuário -->
+  <div id="addUserModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+    <div class="bg-white rounded-xl p-6 w-full max-w-md">
+      <h3 class="text-lg font-semibold mb-4">Criar Novo Usuário</h3>
+      <form id="addUserForm" class="space-y-4">
+        <input type="text" id="newUsername" placeholder="Usuário" required class="w-full border px-3 py-2 rounded-lg">
+        <input type="password" id="newPassword" placeholder="Senha" required class="w-full border px-3 py-2 rounded-lg">
+        <button type="submit" class="w-full bg-green-600 text-white py-2 rounded-lg">Criar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const { createClient } = supabase;
+    const SUPABASE_URL = "https://qlwxnwtzhsrdbnaohmbi.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsd3hud3R6aHNyZGJuYW9obWJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3MTQ2MTAsImV4cCI6MjA3MzI5MDYxMH0.WeXrw-jPYmgHBNQEsbrSq-s3IqTNWDWLqOkWznQ6N84";
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let usuarioLogado = null;
+
+    // ======== USUÁRIOS ========
+
+    async function carregarUsuarios() {
+      const { data: usuarios, error } = await supabaseClient.from('usuarios').select('*');
+      if (error) { console.error(error); return; }
+      const usersList = document.getElementById('usersList');
+      usersList.innerHTML = '';
+      usuarios.forEach(usuario => {
+        const card = document.createElement('div');
+        card.className = "p-4 bg-gray-50 rounded flex justify-between items-center";
+        card.innerHTML = `
+          <div><h4>${usuario.username}</h4><p>${usuario.role}</p></div>
+          <button onclick="removerUsuario('${usuario.id}')" class="text-red-600">Remover</button>
         `;
-        usersList.appendChild(userCard);
-    });
-    lucide.createIcons();
-}
-
-
-        // Função para criar novo usuário
-        function criarUsuario(username, password) {
-            const usuarioExiste = usuarios.find(u => u.username === username);
-            if (usuarioExiste) {
-                alert('Usuário já existe!');
-                return false;
-            }
-            
-            usuarios.push({
-                username: username,
-                password: password,
-                role: 'user'
-            });
-            carregarUsuarios();
-            return true;
-        }
-
-        // Função para remover usuário pelo índice
-       async function removerUsuario(id) {
-    const { error } = await supabaseClient
-        .from('usuarios')
-        .delete()
-        .eq('id', id);
-
-    if (!error) {
-        carregarUsuarios();
-    } else {
-        console.error('Erro ao remover usuário:', error);
+        usersList.appendChild(card);
+      });
     }
-}
 
-        // Função para alterar senha do usuário logado
-        function alterarSenha(senhaAtual, novaSenha) {
-            if (usuarioLogado.password !== senhaAtual) {
-                alert('Senha atual incorreta!');
-                return false;
-            }
-            
-            usuarioLogado.password = novaSenha;
-            const userIndex = usuarios.findIndex(u => u.username === usuarioLogado.username);
-            usuarios[userIndex].password = novaSenha;
-            alert('Senha alterada com sucesso!');
-            return true;
-        }
+    async function criarUsuario(username, password) {
+      await supabaseClient.from('usuarios').insert([{ username, password, role: 'user' }]);
+      await carregarUsuarios();
+    }
 
-        // Event Listeners - Configuração dos eventos de clique e submit
+    async function removerUsuario(id) {
+      await supabaseClient.from('usuarios').delete().eq('id', id);
+      await carregarUsuarios();
+    }
 
-        // Login form
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            if (fazerLogin(username, password)) {
-                document.getElementById('loginError').classList.add('hidden');
-            } else {
-                document.getElementById('loginError').classList.remove('hidden');
-            }
-        });
+    // ======== ESTOQUE ========
 
-        // Logout button
-        document.getElementById('logoutBtn').addEventListener('click', fazerLogout);
+    async function carregarEstoque() {
+      const { data: estoque, error } = await supabaseClient.from('estoque').select('*');
+      if (error) { console.error(error); return; }
+      const tbody = document.getElementById('estoqueTable');
+      tbody.innerHTML = '';
+      estoque.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="px-4 py-2">${item.codigo}</td>
+          <td class="px-4 py-2">${item.produto}</td>
+          <td class="px-4 py-2">${item.categoria}</td>
+          <td class="px-4 py-2">${item.quantidade}</td>
+          <td class="px-4 py-2">R$ ${item.preco.toFixed(2)}</td>
+          <td class="px-4 py-2">
+            <button onclick="removerItem('${item.id}')" class="text-red-600">Excluir</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
 
-        // Navegação entre seções
-        document.querySelectorAll('.nav-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const section = this.dataset.section;
-                
-                // Atualizar botões ativos
-                document.querySelectorAll('.nav-btn').forEach(b => {
-                    b.classList.remove('active', 'border-blue-500', 'text-blue-600');
-                    b.classList.add('border-transparent', 'text-gray-500');
-                });
-                this.classList.add('active', 'border-blue-500', 'text-blue-600');
-                this.classList.remove('border-transparent', 'text-gray-500');
-                
-                // Mostrar seção correspondente
-                document.querySelectorAll('.section-content').forEach(s => s.classList.add('hidden'));
-                document.getElementById(section + 'Section').classList.remove('hidden');
-            });
-        });
+    async function adicionarItem(codigo, produto, categoria, quantidade, preco) {
+      await supabaseClient.from('estoque').insert([{ codigo, produto, categoria, quantidade, preco }]);
+      await carregarEstoque();
+    }
 
-        // Botões de ação
-        document.getElementById('addItemBtn').addEventListener('click', () => {
-            document.getElementById('addItemModal').classList.remove('hidden');
-            document.getElementById('addItemModal').classList.add('flex');
-        });
+    async function removerItem(id) {
+      await supabaseClient.from('estoque').delete().eq('id', id);
+      await carregarEstoque();
+    }
 
-        document.getElementById('exportCsvBtn').addEventListener('click', exportarCSV);
+    // ======== LOGIN ========
 
-        document.getElementById('addUserBtn').addEventListener('click', () => {
-            document.getElementById('addUserModal').classList.remove('hidden');
-            document.getElementById('addUserModal').classList.add('flex');
-        });
+    async function fazerLogin(username, password) {
+      const { data: user } = await supabaseClient.from('usuarios').select('*').eq('username', username).eq('password', password).single();
+      if (user) {
+        usuarioLogado = user;
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        document.getElementById('currentUser').textContent = user.username;
+        carregarEstoque();
+        carregarUsuarios();
+        return true;
+      } else {
+        return false;
+      }
+    }
 
-        document.getElementById('changePasswordBtn').addEventListener('click', () => {
-            document.getElementById('changePasswordModal').classList.remove('hidden');
-            document.getElementById('changePasswordModal').classList.add('flex');
-        });
+    // ======== EVENTOS ========
 
-        // Formulário adicionar item
-        document.getElementById('addItemForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const codigo = document.getElementById('itemCodigo').value;
-            const produto = document.getElementById('itemProduto').value;
-            const categoria = document.getElementById('itemCategoria').value;
-            const quantidade = document.getElementById('itemQuantidade').value;
-            const preco = document.getElementById('itemPreco').value;
-            
-            adicionarItem(codigo, produto, categoria, quantidade, preco);
-            
-            // Fechar modal e limpar formulário
-            document.getElementById('addItemModal').classList.add('hidden');
-            document.getElementById('addItemModal').classList.remove('flex');
-            this.reset();
-        });
+    document.getElementById('loginForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const u = document.getElementById('username').value;
+      const p = document.getElementById('password').value;
+      if (!(await fazerLogin(u, p))) {
+        document.getElementById('loginError').classList.remove('hidden');
+      }
+    });
 
-        // Formulário criar usuário
-        document.getElementById('addUserForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = document.getElementById('newUsername').value;
-            const password = document.getElementById('newPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            if (password !== confirmPassword) {
-                alert('As senhas não coincidem!');
-                return;
-            }
-            
-            if (criarUsuario(username, password)) {
-                // Fechar modal e limpar formulário
-                document.getElementById('addUserModal').classList.add('hidden');
-                document.getElementById('addUserModal').classList.remove('flex');
-                this.reset();
-            }
-        });
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      usuarioLogado = null;
+      document.getElementById('dashboard').classList.add('hidden');
+      document.getElementById('loginScreen').classList.remove('hidden');
+    });
 
-        // Formulário alterar senha
-        document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const senhaAtual = document.getElementById('currentPassword').value;
-            const novaSenha = document.getElementById('newPasswordChange').value;
-            const confirmSenha = document.getElementById('confirmPasswordChange').value;
-            
-            if (novaSenha !== confirmSenha) {
-                alert('As senhas não coincidem!');
-                return;
-            }
-            
-            if (alterarSenha(senhaAtual, novaSenha)) {
-                // Fechar modal e limpar formulário
-                document.getElementById('changePasswordModal').classList.add('hidden');
-                document.getElementById('changePasswordModal').classList.remove('flex');
-                this.reset();
-            }
-        });
+    document.getElementById('addItemBtn').addEventListener('click', () => {
+      document.getElementById('addItemModal').classList.remove('hidden');
+    });
+    document.getElementById('addItemForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      await adicionarItem(
+        document.getElementById('itemCodigo').value,
+        document.getElementById('itemProduto').value,
+        document.getElementById('itemCategoria').value,
+        parseInt(document.getElementById('itemQuantidade').value),
+        parseFloat(document.getElementById('itemPreco').value)
+      );
+      document.getElementById('addItemModal').classList.add('hidden');
+      e.target.reset();
+    });
 
-        // Botões de cancelar modais
-        document.getElementById('cancelAddItem').addEventListener('click', () => {
-            document.getElementById('addItemModal').classList.add('hidden');
-            document.getElementById('addItemModal').classList.remove('flex');
-        });
+    document.getElementById('addUserBtn').addEventListener('click', () => {
+      document.getElementById('addUserModal').classList.remove('hidden');
+    });
+    document.getElementById('addUserForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      await criarUsuario(
+        document.getElementById('newUsername').value,
+        document.getElementById('newPassword').value
+      );
+      document.getElementById('addUserModal').classList.add('hidden');
+      e.target.reset();
+    });
 
-        document.getElementById('cancelAddUser').addEventListener('click', () => {
-            document.getElementById('addUserModal').classList.add('hidden');
-            document.getElementById('addUserModal').classList.remove('flex');
-        });
-
-        document.getElementById('cancelChangePassword').addEventListener('click', () => {
-            document.getElementById('changePasswordModal').classList.add('hidden');
-            document.getElementById('changePasswordModal').classList.remove('flex');
-        });
-
-        // Fechar modais clicando fora
-        document.querySelectorAll('[id$="Modal"]').forEach(modal => {
-            modal.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.classList.add('hidden');
-                    this.classList.remove('flex');
-                }
-            });
-        });
-
-        // Inicializar ícones após carregamento da página
-        document.addEventListener('DOMContentLoaded', function() {
-            lucide.createIcons();
-        });
-    </script>
-
-    <!-- ======================================= -->
-    <!-- SUPABASE CONFIGURAÇÃO - EDITAR AQUI -->
-    <!-- ======================================= -->
-    
-    <!-- Importar biblioteca do Supabase -->
-    <!-- Importar biblioteca do Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script>
-  // Substitua pelos seus dados reais do Supabase
-  const SUPABASE_URL = "https://qlwxnwtzhsrdbnaohmbi.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsd3hud3R6aHNyZGJuYW9obWJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3MTQ2MTAsImV4cCI6MjA3MzI5MDYxMH0.WeXrw-jPYmgHBNQEsbrSq-s3IqTNWDWLqOkWznQ6N84";
-
-  // Inicializar cliente
-  const { createClient } = supabase;
-  const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  // Testar conexão
-  async function testarConexao() {
-    const { data, error } = await supabaseClient.from('estoque').select('*').limit(1);
-    console.log('Teste conexão:', { data, error });
-  }
-  testarConexao();
-
-
-
-        // ============================================
-        // FUNÇÕES DE INTEGRAÇÃO COM SUPABASE
-        // ============================================
-        
-        // 📦 FUNÇÃO: Salvar item no Supabase
-        async function salvarItemSupabase(item) {
-            try {
-                const { data, error } = await supabaseClient
-                    .from('estoque')
-                    .insert([{
-                        codigo: item.codigo,
-                        produto: item.produto,
-                        categoria: item.categoria,
-                        quantidade: item.quantidade,
-                        preco: item.preco
-                    }]);
-                
-                if (error) {
-                    console.error('❌ Erro ao salvar item:', error);
-                    alert('Erro ao salvar item no banco de dados');
-                    return false;
-                }
-                
-                console.log('✅ Item salvo com sucesso:', data);
-                return true;
-            } catch (error) {
-                console.error('❌ Erro na conexão:', error);
-                return false;
-            }
-        }
-        
-        // 📋 FUNÇÃO: Carregar estoque do Supabase
-        async function carregarEstoqueSupabase() {
-            try {
-                const { data, error } = await supabaseClient
-                    .from('estoque')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-                
-                if (error) {
-                    console.error('❌ Erro ao carregar estoque:', error);
-                    return [];
-                }
-                
-                console.log('✅ Estoque carregado:', data);
-                return data || [];
-            } catch (error) {
-                console.error('❌ Erro na conexão:', error);
-                return [];
-            }
-        }
-        
-        // 🗑️ FUNÇÃO: Remover item do Supabase
-        async function removerItemSupabase(itemId) {
-            try {
-                const { error } = await supabaseClient
-                    .from('estoque')
-                    .delete()
-                    .eq('id', itemId);
-                
-                if (error) {
-                    console.error('❌ Erro ao remover item:', error);
-                    return false;
-                }
-                
-                console.log('✅ Item removido com sucesso');
-                return true;
-            } catch (error) {
-                console.error('❌ Erro na conexão:', error);
-                return false;
-            }
-        }
-        
-        // 👤 FUNÇÃO: Salvar usuário no Supabase
-        async function salvarUsuarioSupabase(usuario) {
-            try {
-                const { data, error } = await supabaseClient
-                    .from('usuarios')
-                    .insert([{
-                        username: usuario.username,
-                        password: usuario.password, // ⚠️ Em produção, use hash da senha
-                        role: usuario.role
-                    }]);
-                
-                if (error) {
-                    console.error('❌ Erro ao salvar usuário:', error);
-                    return false;
-                }
-                
-                console.log('✅ Usuário salvo com sucesso:', data);
-                return true;
-            } catch (error) {
-                console.error('❌ Erro na conexão:', error);
-                return false;
-            }
-        }
-        
-        // 👥 FUNÇÃO: Carregar usuários do Supabase
-        async function carregarUsuariosSupabase() {
-            try {
-                const { data, error } = await supabaseClient
-                    .from('usuarios')
-                    .select('*')
-                    .order('created_at', { ascending: true });
-                
-                if (error) {
-                    console.error('❌ Erro ao carregar usuários:', error);
-                    return [];
-                }
-                
-                console.log('✅ Usuários carregados:', data);
-                return data || [];
-            } catch (error) {
-                console.error('❌ Erro na conexão:', error);
-                return [];
-            }
-        }
-        
-        // ============================================
-        // COMANDOS SQL PARA CRIAR AS TABELAS
-        // ============================================
-        
-        /*
-        📊 TABELA: estoque
-        ==================
-        CREATE TABLE estoque (
-            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-            codigo TEXT UNIQUE NOT NULL,
-            produto TEXT NOT NULL,
-            categoria TEXT NOT NULL,
-            quantidade INTEGER NOT NULL DEFAULT 0,
-            preco NUMERIC NOT NULL DEFAULT 0.00,
-            created_at TIMESTAMP DEFAULT NOW(),
-            updated_at TIMESTAMP DEFAULT NOW()
-        );
-        
-        👤 TABELA: usuarios
-        ===================
-        CREATE TABLE usuarios (
-            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-            username TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            role TEXT NOT NULL DEFAULT 'user',
-            created_at TIMESTAMP DEFAULT NOW(),
-            updated_at TIMESTAMP DEFAULT NOW()
-        );
-        */
-        
-        // ============================================
-        // COMO USAR APÓS CONFIGURAR
-        // ============================================
-        
-        /*
-        📝 PASSOS PARA ATIVAR:
-        
-        1. ✅ Crie um projeto no Supabase (https://supabase.com)
-        2. ✅ Copie a URL e Anon Key do seu projeto
-        3. ✅ Cole as credenciais nas variáveis acima
-        4. ✅ Crie as tabelas usando os comandos SQL
-        5. ✅ Substitua as funções locais pelas do Supabase
-        
-        💡 EXEMPLO DE USO:
-        
-        // Em vez de: adicionarItem(codigo, produto, categoria, quantidade, preco)
-        // Use: await salvarItemSupabase({codigo, produto, categoria, quantidade, preco})
-        
-        // Em vez de: carregarEstoque()
-        // Use: estoque = await carregarEstoqueSupabase()
-        */
-    </script>
-    
-    <!-- ======================================= -->
-    <!-- FIM DA CONFIGURAÇÃO DO SUPABASE -->
-    <!-- ======================================= -->
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97e2e9f66634f901',t:'MTc1NzcxNjkwMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+    lucide.createIcons();
+  </script>
+</body>
 </html>
