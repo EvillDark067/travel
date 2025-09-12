@@ -3,1725 +3,947 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Controle de Viagens</title>
+    <title>Sistema de Controle de Estoque</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
-    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
-    <!-- Theme Toggle -->
-    <div class="fixed top-4 right-4 z-50">
-        <button id="themeToggle" class="p-2 rounded-lg bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300">
-            <span class="dark:hidden">🌙</span>
-            <span class="hidden dark:inline">☀️</span>
-        </button>
-    </div>
-
-    <!-- Login Screen -->
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Tela de Login -->
     <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md border border-gray-200 dark:border-gray-700">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
             <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">🚗 Controle de Viagens</h1>
-                <p class="text-gray-600 dark:text-gray-400">Faça login para continuar</p>
+                <div class="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-boxes text-indigo-600 text-2xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800">Sistema de Estoque</h1>
+                <p class="text-gray-600">Faça login para continuar</p>
             </div>
             
             <form id="loginForm" class="space-y-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Usuário</label>
-                    <input type="text" id="username" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="Digite seu usuário" required>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Usuário</label>
+                    <input type="text" id="username" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="Digite seu usuário" required>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Senha</label>
-                    <input type="password" id="password" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="Digite sua senha" required>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Senha</label>
+                    <input type="password" id="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="Digite sua senha" required>
                 </div>
                 
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-300 shadow-lg hover:shadow-xl">
+                <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition duration-200 font-medium">
                     Entrar
                 </button>
-                
-                <button type="button" onclick="resetSystem()" class="w-full mt-3 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300 text-sm">
-                    🔄 Resetar Sistema (Emergência)
+            </form>
+            
+            <div class="mt-6 text-center">
+                <button id="datacenterBtn" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-200 font-medium w-full">
+                    <i class="fas fa-database mr-2"></i>Configurar Datacenter
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela de Configuração do Datacenter -->
+    <div id="datacenterScreen" class="hidden min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-2xl">
+            <div class="text-center mb-8">
+                <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-database text-green-600 text-2xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800">Configuração do Datacenter</h1>
+                <p class="text-gray-600">Configure a conexão com o Supabase</p>
+            </div>
+            
+            <form id="datacenterForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">URL do Projeto Supabase</label>
+                    <input type="url" id="supabaseUrl" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="https://seu-projeto.supabase.co" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Anon Key</label>
+                    <textarea id="supabaseKey" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent h-24 resize-none" placeholder="Cole sua chave anônima aqui" required></textarea>
+                </div>
+                
+                <div class="flex space-x-4">
+                    <button type="button" id="testConnection" class="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-200 font-medium">
+                        <i class="fas fa-plug mr-2"></i>Testar Conexão
+                    </button>
+                    <button type="submit" class="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition duration-200 font-medium">
+                        <i class="fas fa-save mr-2"></i>Salvar
+                    </button>
+                </div>
+            </form>
+            
+            <div id="connectionStatus" class="mt-6 p-4 rounded-lg hidden">
+                <div class="flex items-center">
+                    <i class="fas fa-circle mr-2"></i>
+                    <span id="statusText"></span>
+                </div>
+            </div>
+            
+            <div class="mt-6 text-center">
+                <button id="backToLogin" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
+                    <i class="fas fa-arrow-left mr-2"></i>Voltar ao Login
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistema Principal -->
+    <div id="mainSystem" class="hidden">
+        <!-- Header -->
+        <header class="bg-white shadow-lg border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center">
+                        <div class="bg-indigo-100 w-10 h-10 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-boxes text-indigo-600"></i>
+                        </div>
+                        <h1 class="text-xl font-bold text-gray-800">Controle de Estoque</h1>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <span class="text-gray-600">Olá, <span id="currentUser" class="font-medium"></span></span>
+                        <button id="logoutBtn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-200">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Sair
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="bg-indigo-600 shadow-lg">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex space-x-8">
+                    <button class="nav-btn active text-white px-4 py-3 font-medium border-b-2 border-white" data-section="inventory">
+                        <i class="fas fa-boxes mr-2"></i>Estoque
+                    </button>
+                    <button class="nav-btn text-indigo-200 px-4 py-3 font-medium hover:text-white transition duration-200" data-section="users">
+                        <i class="fas fa-users mr-2"></i>Usuários
+                    </button>
+                    <button class="nav-btn text-indigo-200 px-4 py-3 font-medium hover:text-white transition duration-200" data-section="profile">
+                        <i class="fas fa-user-cog mr-2"></i>Perfil
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Seção de Estoque -->
+        <div id="inventorySection" class="section max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-bold text-gray-800">Gerenciar Estoque</h2>
+                <div class="flex space-x-4">
+                    <button id="exportCsv" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition duration-200">
+                        <i class="fas fa-download mr-2"></i>Exportar CSV
+                    </button>
+                    <button id="addItemBtn" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition duration-200">
+                        <i class="fas fa-plus mr-2"></i>Adicionar Item
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <input type="text" id="searchItems" placeholder="Buscar itens..." class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                    <select id="categoryFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        <option value="">Todas as categorias</option>
+                    </select>
+                    <select id="stockFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        <option value="">Todos os estoques</option>
+                        <option value="low">Estoque baixo (≤5)</option>
+                        <option value="normal">Estoque normal</option>
+                        <option value="high">Estoque alto (≥50)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Lista de Itens -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantidade</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Preço</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemsTable" class="bg-white divide-y divide-gray-200">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção de Usuários -->
+        <div id="usersSection" class="section hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-bold text-gray-800">Gerenciar Usuários</h2>
+                <button id="addUserBtn" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition duration-200">
+                    <i class="fas fa-user-plus mr-2"></i>Adicionar Usuário
+                </button>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Criado em</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTable" class="bg-white divide-y divide-gray-200">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção de Perfil -->
+        <div id="profileSection" class="section hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="max-w-2xl mx-auto">
+                <h2 class="text-2xl font-bold text-gray-800 mb-8">Meu Perfil</h2>
+                
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <form id="changePasswordForm" class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Senha Atual</label>
+                            <input type="password" id="currentPassword" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nova Senha</label>
+                            <input type="password" id="newPassword" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Confirmar Nova Senha</label>
+                            <input type="password" id="confirmPassword" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+                        </div>
+                        
+                        <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition duration-200 font-medium">
+                            Alterar Senha
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Adicionar/Editar Item -->
+    <div id="itemModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="itemModalTitle" class="text-xl font-bold text-gray-800">Adicionar Item</h3>
+                <button id="closeItemModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="itemForm" class="space-y-4">
+                <input type="hidden" id="itemId">
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nome do Item</label>
+                    <input type="text" id="itemName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Categoria</label>
+                    <input type="text" id="itemCategory" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Quantidade</label>
+                        <input type="number" id="itemQuantity" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Preço (R$)</label>
+                        <input type="number" id="itemPrice" min="0" step="0.01" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Descrição</label>
+                    <textarea id="itemDescription" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 h-20 resize-none"></textarea>
+                </div>
+                
+                <div class="flex space-x-4 pt-4">
+                    <button type="button" id="cancelItem" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-400 transition duration-200 font-medium">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition duration-200 font-medium">
+                        Salvar
+                    </button>
+                </div>
             </form>
         </div>
     </div>
 
-    <!-- Admin Dashboard -->
-    <div id="adminDashboard" class="hidden min-h-screen p-4">
-        <div class="max-w-6xl mx-auto">
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
-                <div class="flex justify-between items-center">
-                    <h1 class="text-2xl font-bold text-gray-800 dark:text-white">👨‍💼 Painel Administrativo</h1>
-                    <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors duration-300">
-                        Sair do Sistema
-                    </button>
-                </div>
+    <!-- Modal para Adicionar Usuário -->
+    <div id="userModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800">Adicionar Usuário</h3>
+                <button id="closeUserModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Gerenciar Usuários -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-                    <div class="text-center">
-                        <div class="text-4xl mb-4">👥</div>
-                        <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-3">GERENCIAR USUÁRIOS</h3>
-                        <p class="text-gray-600 dark:text-gray-400 mb-4">Cadastrar e gerenciar motoristas</p>
-                        <button onclick="showUserManagement()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-bold transition-all duration-300">
-                            GERENCIAR
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Gerenciar Veículos -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-                    <div class="text-center">
-                        <div class="text-4xl mb-4">🚙</div>
-                        <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-3">GERENCIAR VEÍCULOS</h3>
-                        <p class="text-gray-600 dark:text-gray-400 mb-4">Cadastrar e gerenciar frota</p>
-                        <button onclick="showVehicleManagement()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-bold transition-all duration-300">
-                            GERENCIAR
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Relatórios -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-                    <div class="text-center">
-                        <div class="text-4xl mb-4">📊</div>
-                        <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-3">RELATÓRIOS</h3>
-                        <p class="text-gray-600 dark:text-gray-400 mb-4">Gerar PDF de viagens</p>
-                        <button onclick="showReports()" class="bg-purple-500 hover:bg-purple-600 text-white px-6 py-3 rounded-lg font-bold transition-all duration-300">
-                            VISUALIZAR
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Status Viagens -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-                    <div class="text-center">
-                        <div class="text-4xl mb-4">🗺️</div>
-                        <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-3">STATUS VIAGENS</h3>
-                        <p class="text-gray-600 dark:text-gray-400 mb-4">Acompanhar viagens</p>
-                        <button onclick="showTripStatus()" class="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold transition-all duration-300">
-                            VISUALIZAR
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Data Center -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-                    <div class="text-center">
-                        <div class="text-4xl mb-4">🔗</div>
-                        <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-3">DATA CENTER</h3>
-                        <p class="text-gray-600 dark:text-gray-400 mb-4">Configurar Supabase</p>
-                        <button onclick="showDataCenter()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-bold transition-all duration-300">
-                            CONFIGURAR
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Driver Dashboard -->
-    <div id="driverDashboard" class="hidden min-h-screen p-4">
-        <div class="max-w-6xl mx-auto">
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
-                <div class="flex justify-between items-center">
-                    <h1 class="text-2xl font-bold text-gray-800 dark:text-white">🚗 Painel do Motorista</h1>
-                    <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors duration-300">
-                        Sair do Sistema
-                    </button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Trip Management -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">🎯 Gerenciar Viagem</h2>
-                    
-                    <!-- Start Trip Form -->
-                    <div id="startTripForm" class="space-y-4">
-                        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-                            <div class="flex items-center space-x-3">
-                                <span class="text-2xl">👨‍💼</span>
-                                <div>
-                                    <h4 class="font-bold text-blue-800 dark:text-blue-300">MOTORISTA</h4>
-                                    <p id="loggedDriverName" class="text-blue-700 dark:text-blue-400 font-medium"></p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">VEÍCULO</label>
-                            <select id="vehicleSelect" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" required>
-                                <option value="">Selecione o veículo</option>
-                            </select>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">KM INICIAL</label>
-                            <input type="number" id="initialKm" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="Digite a quilometragem inicial" required>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">DESTINO</label>
-                            <input type="text" id="destination" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="Digite o destino" required>
-                        </div>
-                        
-                        <button onclick="startTrip()" class="w-full bg-green-500 hover:bg-green-600 text-white px-6 py-4 rounded-lg font-bold transition-all duration-300">
-                            🚀 INICIAR VIAGEM
-                        </button>
-                    </div>
-
-                    <!-- Active Trip Display -->
-                    <div id="activeTripDisplay" class="hidden">
-                        <div class="bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800 rounded-xl p-6 mb-6">
-                            <h3 class="text-xl font-bold text-green-800 dark:text-green-300 mb-4">🟢 VIAGEM EM ANDAMENTO</h3>
-                            <div id="tripDetails" class="space-y-3 text-gray-700 dark:text-gray-300"></div>
-                        </div>
-                        
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">KM FINAL</label>
-                                <input type="number" id="finalKm" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="Digite a quilometragem final" required>
-                            </div>
-                            
-                            <button onclick="endTrip()" class="w-full bg-red-500 hover:bg-red-600 text-white px-6 py-4 rounded-lg font-bold transition-all duration-300">
-                                🏁 ENCERRAR VIAGEM
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Driver Trip History -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">📋 Minhas Viagens</h2>
-                    
-                    <div class="space-y-4">
-                        <!-- Driver Stats -->
-                        <div class="grid grid-cols-2 gap-4 mb-6">
-                            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-blue-600 dark:text-blue-400" id="driverTotalTrips">0</div>
-                                    <div class="text-sm text-blue-800 dark:text-blue-300 font-medium">VIAGENS</div>
-                                </div>
-                            </div>
-                            <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-green-600 dark:text-green-400" id="driverTotalKm">0</div>
-                                    <div class="text-sm text-green-800 dark:text-green-300 font-medium">KM TOTAL</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Recent Trips -->
-                        <div class="max-h-96 overflow-y-auto">
-                            <div id="driverTripsContainer" class="space-y-3">
-                                <div class="text-center text-gray-500 dark:text-gray-400 py-8">
-                                    Nenhuma viagem realizada ainda
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- User Management Screen -->
-    <div id="userManagementScreen" class="hidden min-h-screen p-4">
-        <div class="max-w-6xl mx-auto">
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
-                <div class="flex justify-between items-center">
-                    <h1 class="text-2xl font-bold text-gray-800 dark:text-white">👥 Gerenciamento de Usuários</h1>
-                    <div class="space-x-2">
-                        <button onclick="showAdminDashboard()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors duration-300">
-                            Voltar ao Menu
-                        </button>
-                        <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors duration-300">
-                            Sair do Sistema
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-                <div class="flex space-x-4 mb-6">
-                    <button id="addUserTab" onclick="showAddUserTab()" class="px-4 py-2 bg-green-500 text-white rounded-lg transition-colors duration-300">
-                        Cadastrar Usuário
-                    </button>
-                    <button id="listUsersTab" onclick="showListUsersTab()" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors duration-300">
-                        Listar Usuários
-                    </button>
-                </div>
-
-                <!-- Add User Tab -->
-                <div id="addUserContent">
-                    <form id="userForm" class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">NOME DO USUÁRIO</label>
-                                <input type="text" id="newUserName" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="Digite o nome completo" required>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">USUÁRIO</label>
-                                <input type="text" id="newUsername" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="Digite o nome de usuário" required>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">SENHA</label>
-                                <input type="password" id="newPassword" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="Digite a senha" required>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">TIPO DE USUÁRIO</label>
-                                <select id="newUserRole" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" required>
-                                    <option value="">Selecione o tipo</option>
-                                    <option value="driver">Motorista</option>
-                                    <option value="gestor">Gestor</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-lg font-bold transition-all duration-300">
-                            CADASTRAR USUÁRIO
-                        </button>
-                    </form>
-                </div>
-
-                <!-- List Users Tab -->
-                <div id="listUsersContent" class="hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full border-collapse border border-gray-300 dark:border-gray-600">
-                            <thead>
-                                <tr class="bg-gray-100 dark:bg-gray-700">
-                                    <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left text-gray-800 dark:text-white">Nome</th>
-                                    <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left text-gray-800 dark:text-white">Usuário</th>
-                                    <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left text-gray-800 dark:text-white">Tipo</th>
-                                    <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left text-gray-800 dark:text-white">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="usersTableBody" class="text-gray-700 dark:text-gray-300">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Vehicle Management Screen -->
-    <div id="vehicleManagementScreen" class="hidden min-h-screen p-4">
-        <div class="max-w-6xl mx-auto">
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
-                <div class="flex justify-between items-center">
-                    <h1 class="text-2xl font-bold text-gray-800 dark:text-white">🚙 Gerenciamento de Veículos</h1>
-                    <div class="space-x-2">
-                        <button onclick="showAdminDashboard()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors duration-300">
-                            Voltar ao Menu
-                        </button>
-                        <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors duration-300">
-                            Sair do Sistema
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-                <div class="flex space-x-4 mb-6">
-                    <button id="addVehicleTab" onclick="showAddVehicleTab()" class="px-4 py-2 bg-blue-500 text-white rounded-lg transition-colors duration-300">
-                        Cadastrar Veículo
-                    </button>
-                    <button id="listVehiclesTab" onclick="showListVehiclesTab()" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors duration-300">
-                        Listar Veículos
-                    </button>
-                </div>
-
-                <!-- Add Vehicle Tab -->
-                <div id="addVehicleContent">
-                    <form id="vehicleForm" class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">PLACA</label>
-                                <input type="text" id="vehiclePlate" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="ABC-1234" required>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">MARCA</label>
-                                <input type="text" id="vehicleBrand" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="Toyota, Ford, Chevrolet..." required>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">MODELO</label>
-                                <input type="text" id="vehicleModel" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="Corolla, Fiesta, Onix..." required>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">ANO</label>
-                                <input type="number" id="vehicleYear" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="2020" min="1990" max="2030" required>
-                            </div>
-                        </div>
-                        
-                        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 rounded-lg font-bold transition-all duration-300">
-                            🚙 CADASTRAR VEÍCULO
-                        </button>
-                    </form>
-                </div>
-
-                <!-- List Vehicles Tab -->
-                <div id="listVehiclesContent" class="hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full border-collapse border border-gray-300 dark:border-gray-600">
-                            <thead>
-                                <tr class="bg-gray-100 dark:bg-gray-700">
-                                    <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left text-gray-800 dark:text-white">Placa</th>
-                                    <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left text-gray-800 dark:text-white">Marca</th>
-                                    <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left text-gray-800 dark:text-white">Modelo</th>
-                                    <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left text-gray-800 dark:text-white">Ano</th>
-                                    <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left text-gray-800 dark:text-white">Status</th>
-                                    <th class="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left text-gray-800 dark:text-white">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="vehiclesTableBody" class="text-gray-700 dark:text-gray-300">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Reports Screen -->
-    <div id="reportsScreen" class="hidden min-h-screen p-4">
-        <div class="max-w-7xl mx-auto">
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
-                <div class="flex justify-between items-center">
-                    <h1 class="text-2xl font-bold text-gray-800 dark:text-white">📊 Relatórios e Dashboard</h1>
-                    <div class="space-x-2">
-                        <button onclick="showAdminDashboard()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors duration-300">
-                            Voltar ao Menu
-                        </button>
-                        <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors duration-300">
-                            Sair do Sistema
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dashboard Stats -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6 border-2 border-blue-200 dark:border-blue-800">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-sm font-bold text-blue-800 dark:text-blue-300">TOTAL VIAGENS</h3>
-                            <p class="text-3xl font-bold text-blue-600 dark:text-blue-400" id="dashTotalTrips">0</p>
-                        </div>
-                        <div class="text-4xl">🚗</div>
-                    </div>
-                </div>
-
-                <div class="bg-green-50 dark:bg-green-900/20 rounded-xl p-6 border-2 border-green-200 dark:border-green-800">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-sm font-bold text-green-800 dark:text-green-300">KM TOTAL</h3>
-                            <p class="text-3xl font-bold text-green-600 dark:text-green-400" id="dashTotalKm">0</p>
-                        </div>
-                        <div class="text-4xl">📏</div>
-                    </div>
-                </div>
-
-                <div class="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-6 border-2 border-purple-200 dark:border-purple-800">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-sm font-bold text-purple-800 dark:text-purple-300">MOTORISTAS ATIVOS</h3>
-                            <p class="text-3xl font-bold text-purple-600 dark:text-purple-400" id="dashActiveDrivers">0</p>
-                        </div>
-                        <div class="text-4xl">👨‍💼</div>
-                    </div>
-                </div>
-
-                <div class="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-6 border-2 border-orange-200 dark:border-orange-800">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-sm font-bold text-orange-800 dark:text-orange-300">VEÍCULOS ATIVOS</h3>
-                            <p class="text-3xl font-bold text-orange-600 dark:text-orange-400" id="dashActiveVehicles">0</p>
-                        </div>
-                        <div class="text-4xl">🚙</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Report Generation -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-                <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-6">📄 Gerar Relatório</h2>
-                
-                <div class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">MOTORISTA</label>
-                            <select id="reportDriver" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                <option value="">Todos os motoristas</option>
-                            </select>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">PERÍODO</label>
-                            <select id="reportPeriod" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                <option value="7">Últimos 7 dias</option>
-                                <option value="15">Últimos 15 dias</option>
-                                <option value="30">Últimos 30 dias</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="pt-4">
-                        <button onclick="generateReport()" class="bg-purple-500 hover:bg-purple-600 text-white px-8 py-4 rounded-lg font-bold transition-all duration-300">
-                            📄 GERAR RELATÓRIO PDF
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Trip Status Screen -->
-    <div id="tripStatusScreen" class="hidden min-h-screen p-4">
-        <div class="max-w-7xl mx-auto">
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
-                <div class="flex justify-between items-center">
-                    <h1 class="text-2xl font-bold text-gray-800 dark:text-white">🗺️ Status das Viagens</h1>
-                    <div class="space-x-2">
-                        <button onclick="showAdminDashboard()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors duration-300">
-                            Voltar ao Menu
-                        </button>
-                        <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors duration-300">
-                            Sair do Sistema
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                <!-- Quick Stats -->
-                <div class="bg-green-50 dark:bg-green-900/20 rounded-xl p-6 border-2 border-green-200 dark:border-green-800">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-bold text-green-800 dark:text-green-300">EM TRÂNSITO</h3>
-                            <p class="text-3xl font-bold text-green-600 dark:text-green-400" id="activeTripsCount">0</p>
-                        </div>
-                        <div class="text-4xl">🚗</div>
-                    </div>
-                </div>
-
-                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6 border-2 border-blue-200 dark:border-blue-800">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-bold text-blue-800 dark:text-blue-300">ENCERRADAS</h3>
-                            <p class="text-3xl font-bold text-blue-600 dark:text-blue-400" id="completedTripsCount">0</p>
-                        </div>
-                        <div class="text-4xl">🏁</div>
-                    </div>
-                </div>
-
-                <div class="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-6 border-2 border-purple-200 dark:border-purple-800">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-bold text-purple-800 dark:text-purple-300">KM TOTAL</h3>
-                            <p class="text-3xl font-bold text-purple-600 dark:text-purple-400" id="totalKmCount">0</p>
-                        </div>
-                        <div class="text-4xl">📊</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-                <div class="flex space-x-4 mb-6">
-                    <button id="activeTripsTab" onclick="showActiveTrips()" class="px-6 py-3 bg-green-500 text-white rounded-xl font-bold transition-all duration-300">
-                        🚗 EM TRÂNSITO
-                    </button>
-                    <button id="completedTripsTab" onclick="showCompletedTrips()" class="px-6 py-3 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-bold transition-all duration-300">
-                        🏁 ENCERRADAS
-                    </button>
+            
+            <form id="userForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nome de Usuário</label>
+                    <input type="text" id="newUsername" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
                 </div>
                 
-                <!-- Active Trips -->
-                <div id="activeTripsContent">
-                    <div id="activeTripsCards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div class="col-span-full text-center text-gray-500 dark:text-gray-400 py-12">
-                            <div class="text-6xl mb-4">🚗</div>
-                            <p class="text-xl font-medium">Nenhuma viagem em andamento</p>
-                        </div>
-                    </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Senha</label>
+                    <input type="password" id="newUserPassword" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" required>
                 </div>
                 
-                <!-- Completed Trips -->
-                <div id="completedTripsContent" class="hidden">
-                    <div class="mb-6">
-                        <input type="text" id="tripSearchFilter" placeholder="🔍 Buscar viagem..." class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                    </div>
-                    
-                    <div id="completedTripsTable" class="overflow-x-auto">
-                        <table class="w-full border-collapse bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg">
-                            <thead>
-                                <tr class="bg-gray-100 dark:bg-gray-700">
-                                    <th class="px-6 py-4 text-left text-gray-800 dark:text-white font-bold">MOTORISTA</th>
-                                    <th class="px-6 py-4 text-left text-gray-800 dark:text-white font-bold">VEÍCULO</th>
-                                    <th class="px-6 py-4 text-left text-gray-800 dark:text-white font-bold">DESTINO</th>
-                                    <th class="px-6 py-4 text-left text-gray-800 dark:text-white font-bold">INÍCIO</th>
-                                    <th class="px-6 py-4 text-left text-gray-800 dark:text-white font-bold">FIM</th>
-                                    <th class="px-6 py-4 text-left text-gray-800 dark:text-white font-bold">KM</th>
-                                </tr>
-                            </thead>
-                            <tbody id="completedTripsBody" class="text-gray-700 dark:text-gray-300">
-                                <tr>
-                                    <td colspan="6" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                                        <div class="text-6xl mb-4">🏁</div>
-                                        <p class="text-xl font-medium">Nenhuma viagem encerrada</p>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="flex space-x-4 pt-4">
+                    <button type="button" id="cancelUser" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-400 transition duration-200 font-medium">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition duration-200 font-medium">
+                        Criar Usuário
+                    </button>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Data Center Screen -->
-    <div id="dataCenterScreen" class="hidden min-h-screen p-4">
-        <div class="max-w-6xl mx-auto">
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
-                <div class="flex justify-between items-center">
-                    <h1 class="text-2xl font-bold text-gray-800 dark:text-white">🔗 Data Center - Configuração do Supabase</h1>
-                    <div class="space-x-2">
-                        <button onclick="showAdminDashboard()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors duration-300">
-                            Voltar ao Menu
-                        </button>
-                        <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors duration-300">
-                            Sair do Sistema
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-                <div class="space-y-6">
-                    <!-- Connection Status -->
-                    <div id="connectionStatus" class="hidden p-4 rounded-lg border-2">
-                        <div class="flex items-center space-x-3">
-                            <div id="statusIcon" class="text-2xl"></div>
-                            <div>
-                                <h4 id="statusTitle" class="font-bold"></h4>
-                                <p id="statusMessage" class="text-sm"></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Configuration Form -->
-                    <div class="grid grid-cols-1 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">URL do Projeto Supabase</label>
-                            <input type="url" id="supabaseUrl" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="https://seu-projeto.supabase.co">
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Encontre em: Settings → API → Project URL</p>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Anon Key</label>
-                            <input type="password" id="supabaseKey" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Encontre em: Settings → API → Project API keys → anon public</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Action Buttons -->
-                    <div class="flex flex-wrap gap-3 pt-4">
-                        <button id="testBtn" onclick="testConnection()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg transition-colors duration-300 font-semibold flex items-center space-x-2">
-                            <span id="testBtnIcon">🔍</span>
-                            <span id="testBtnText">Testar Conexão</span>
-                        </button>
-                        <button onclick="saveConfig()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors duration-300 font-semibold">
-                            💾 Salvar Configuração
-                        </button>
-                        <button onclick="syncData()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors duration-300 font-semibold">
-                            🔄 Sincronizar Dados
-                        </button>
-                        <button onclick="testTables()" class="bg-purple-500 hover:bg-purple-600 text-white px-6 py-3 rounded-lg transition-colors duration-300 font-semibold">
-                            📋 Verificar Tabelas
-                        </button>
-                    </div>
-
-                    <!-- Database Info -->
-                    <div id="databaseInfo" class="hidden bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
-                        <h4 class="font-bold text-gray-800 dark:text-white mb-3">📊 Informações do Banco</h4>
-                        <div id="tablesList" class="space-y-2"></div>
-                    </div>
-
-                    <!-- Instructions -->
-                    <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-                        <h4 class="font-bold text-blue-800 dark:text-blue-300 mb-2">📖 Como Configurar:</h4>
-                        <ol class="text-sm text-blue-700 dark:text-blue-400 space-y-1 list-decimal list-inside">
-                            <li>Acesse seu projeto no <a href="https://supabase.com" target="_blank" class="underline">Supabase</a></li>
-                            <li>Vá em Settings → API</li>
-                            <li>Copie a "Project URL" e cole no campo acima</li>
-                            <li>Copie a "anon public" key e cole no campo de chave</li>
-                            <li>Execute o script SQL das tabelas no SQL Editor</li>
-                            <li>Teste a conexão e sincronize os dados</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 
     <script>
-        // Global variables
+        // Variáveis globais
+        let supabase = null;
         let currentUser = null;
+        let items = [];
         let users = [];
-        let vehicles = [];
-        let trips = [];
-        let activeTrip = null;
-        let supabaseConfig = { url: '', key: '' };
-        let supabaseClient = null;
 
-        // Initialize application
-        function initApp() {
-            initTheme();
-            loadLocalData();
-            ensureAdminUser();
-            loadSupabaseConfig();
-            console.log('Sistema inicializado com sucesso');
-        }
-
-        // Theme management
-        function initTheme() {
-            const theme = localStorage.getItem('theme') || 'light';
-            document.documentElement.classList.toggle('dark', theme === 'dark');
-        }
-
-        document.getElementById('themeToggle').addEventListener('click', function() {
-            document.documentElement.classList.toggle('dark');
-            const theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-            localStorage.setItem('theme', theme);
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
         });
 
-        // Data management
-        function loadLocalData() {
+        function initializeApp() {
+            // Verificar se há configuração do Supabase salva
+            const savedConfig = localStorage.getItem('supabaseConfig');
+            if (savedConfig) {
+                const config = JSON.parse(savedConfig);
+                initializeSupabase(config.url, config.key);
+            }
+
+            // Verificar se há usuário logado
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = savedUser;
+                showMainSystem();
+            }
+
+            setupEventListeners();
+            loadSampleData();
+        }
+
+        function initializeSupabase(url, key) {
             try {
-                const savedUsers = localStorage.getItem('users');
-                const savedVehicles = localStorage.getItem('vehicles');
-                const savedTrips = localStorage.getItem('trips');
-                
-                users = savedUsers ? JSON.parse(savedUsers) : [];
-                vehicles = savedVehicles ? JSON.parse(savedVehicles) : [];
-                trips = savedTrips ? JSON.parse(savedTrips) : [];
-                
-                console.log('Dados carregados:', { users: users.length, vehicles: vehicles.length, trips: trips.length });
+                supabase = window.supabase.createClient(url, key);
+                console.log('Supabase inicializado com sucesso');
             } catch (error) {
-                console.error('Erro ao carregar dados:', error);
-                users = [];
-                vehicles = [];
-                trips = [];
+                console.error('Erro ao inicializar Supabase:', error);
             }
         }
 
-        function saveLocalData() {
-            try {
-                localStorage.setItem('users', JSON.stringify(users));
-                localStorage.setItem('vehicles', JSON.stringify(vehicles));
-                localStorage.setItem('trips', JSON.stringify(trips));
-                console.log('Dados salvos no localStorage');
-            } catch (error) {
-                console.error('Erro ao salvar dados:', error);
-            }
-        }
+        function setupEventListeners() {
+            // Login
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('datacenterBtn').addEventListener('click', showDatacenterScreen);
+            document.getElementById('backToLogin').addEventListener('click', showLoginScreen);
 
-        function ensureAdminUser() {
-            const adminExists = users.find(u => u.username === 'admin' && u.role === 'admin');
-            if (!adminExists) {
-                console.log('Criando usuário admin padrão...');
-                users.unshift({ 
-                    id: 1, 
-                    name: 'Administrador', 
-                    username: 'admin', 
-                    password: 'admin123', 
-                    role: 'admin' 
+            // Datacenter
+            document.getElementById('datacenterForm').addEventListener('submit', saveDatacenterConfig);
+            document.getElementById('testConnection').addEventListener('click', testSupabaseConnection);
+
+            // Navegação
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const section = e.target.closest('.nav-btn').dataset.section;
+                    showSection(section);
                 });
-                saveLocalData();
-                console.log('Usuário admin criado');
-            }
+            });
+
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+
+            // Modais
+            document.getElementById('addItemBtn').addEventListener('click', () => openItemModal());
+            document.getElementById('addUserBtn').addEventListener('click', () => openUserModal());
+            document.getElementById('closeItemModal').addEventListener('click', closeItemModal);
+            document.getElementById('closeUserModal').addEventListener('click', closeUserModal);
+            document.getElementById('cancelItem').addEventListener('click', closeItemModal);
+            document.getElementById('cancelUser').addEventListener('click', closeUserModal);
+
+            // Formulários
+            document.getElementById('itemForm').addEventListener('submit', handleItemSubmit);
+            document.getElementById('userForm').addEventListener('submit', handleUserSubmit);
+            document.getElementById('changePasswordForm').addEventListener('submit', handlePasswordChange);
+
+            // Filtros e busca
+            document.getElementById('searchItems').addEventListener('input', filterItems);
+            document.getElementById('categoryFilter').addEventListener('change', filterItems);
+            document.getElementById('stockFilter').addEventListener('change', filterItems);
+
+            // Export CSV
+            document.getElementById('exportCsv').addEventListener('click', exportToCSV);
         }
 
-        function resetSystem() {
-            if (confirm('ATENÇÃO: Isso irá apagar TODOS os dados salvos e restaurar as configurações padrão.\n\nTem certeza que deseja continuar?')) {
-                localStorage.clear();
-                users = [];
-                vehicles = [];
-                trips = [];
-                ensureAdminUser();
-                alert('Sistema resetado com sucesso!\n\nCredenciais padrão:\nUsuário: admin\nSenha: admin123');
-                location.reload();
-            }
+        function loadSampleData() {
+            // Usuários padrão
+            users = [
+                { id: 1, username: 'lucas', password: '1234', createdAt: new Date().toISOString() }
+            ];
+
+            // Itens de exemplo
+            items = [
+                { id: 1, name: 'Notebook Dell', category: 'Eletrônicos', quantity: 15, price: 2500.00, description: 'Notebook para escritório', createdAt: new Date().toISOString() },
+                { id: 2, name: 'Mouse Logitech', category: 'Periféricos', quantity: 50, price: 89.90, description: 'Mouse sem fio', createdAt: new Date().toISOString() },
+                { id: 3, name: 'Teclado Mecânico', category: 'Periféricos', quantity: 3, price: 299.99, description: 'Teclado mecânico RGB', createdAt: new Date().toISOString() },
+                { id: 4, name: 'Monitor 24"', category: 'Eletrônicos', quantity: 8, price: 899.00, description: 'Monitor Full HD', createdAt: new Date().toISOString() },
+                { id: 5, name: 'Cabo HDMI', category: 'Cabos', quantity: 25, price: 29.90, description: 'Cabo HDMI 2.0', createdAt: new Date().toISOString() }
+            ];
+
+            updateCategoryFilter();
         }
 
-        // Login functionality
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        async function handleLogin(e) {
             e.preventDefault();
-            const username = document.getElementById('username').value.trim();
+            const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            
-            console.log('Tentativa de login:', username);
-            
+
             const user = users.find(u => u.username === username && u.password === password);
             
             if (user) {
-                console.log('Login bem-sucedido:', user.name, user.role);
-                currentUser = user;
-                hideAllScreens();
-                
-                if (user.role === 'admin') {
-                    document.getElementById('adminDashboard').classList.remove('hidden');
-                } else if (user.role === 'driver') {
-                    document.getElementById('driverDashboard').classList.remove('hidden');
-                    loadDriverData();
-                }
+                currentUser = username;
+                localStorage.setItem('currentUser', currentUser);
+                showMainSystem();
+                showNotification('Login realizado com sucesso!', 'success');
             } else {
-                console.log('Login falhou');
-                alert('Usuário ou senha incorretos!\n\nCredenciais padrão:\nUsuário: admin\nSenha: admin123');
+                showNotification('Usuário ou senha incorretos!', 'error');
             }
-        });
+        }
+
+        function showDatacenterScreen() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('datacenterScreen').classList.remove('hidden');
+        }
+
+        function showLoginScreen() {
+            document.getElementById('datacenterScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+        }
+
+        async function testSupabaseConnection() {
+            const url = document.getElementById('supabaseUrl').value;
+            const key = document.getElementById('supabaseKey').value;
+
+            if (!url || !key) {
+                showNotification('Preencha todos os campos!', 'error');
+                return;
+            }
+
+            try {
+                const testClient = window.supabase.createClient(url, key);
+                const { data, error } = await testClient.from('users').select('count').limit(1);
+                
+                if (error) {
+                    showConnectionStatus('Erro na conexão: ' + error.message, 'error');
+                } else {
+                    showConnectionStatus('Conexão estabelecida com sucesso!', 'success');
+                }
+            } catch (error) {
+                showConnectionStatus('Erro ao conectar: ' + error.message, 'error');
+            }
+        }
+
+        function showConnectionStatus(message, type) {
+            const statusDiv = document.getElementById('connectionStatus');
+            const statusText = document.getElementById('statusText');
+            
+            statusDiv.classList.remove('hidden', 'bg-green-100', 'bg-red-100', 'text-green-800', 'text-red-800');
+            
+            if (type === 'success') {
+                statusDiv.classList.add('bg-green-100', 'text-green-800');
+                statusDiv.querySelector('i').className = 'fas fa-check-circle mr-2 text-green-600';
+            } else {
+                statusDiv.classList.add('bg-red-100', 'text-red-800');
+                statusDiv.querySelector('i').className = 'fas fa-exclamation-circle mr-2 text-red-600';
+            }
+            
+            statusText.textContent = message;
+        }
+
+        async function saveDatacenterConfig(e) {
+            e.preventDefault();
+            const url = document.getElementById('supabaseUrl').value;
+            const key = document.getElementById('supabaseKey').value;
+
+            const config = { url, key };
+            localStorage.setItem('supabaseConfig', JSON.stringify(config));
+            
+            initializeSupabase(url, key);
+            showNotification('Configuração salva com sucesso!', 'success');
+            
+            // Tentar sincronizar dados
+            if (supabase) {
+                await syncDataToSupabase();
+            }
+            
+            showLoginScreen();
+        }
+
+        async function syncDataToSupabase() {
+            if (!supabase) return;
+
+            try {
+                // Sincronizar usuários
+                for (const user of users) {
+                    await supabase.from('users').upsert({
+                        id: user.id,
+                        username: user.username,
+                        password: user.password,
+                        created_at: user.createdAt
+                    });
+                }
+
+                // Sincronizar itens
+                for (const item of items) {
+                    await supabase.from('items').upsert({
+                        id: item.id,
+                        name: item.name,
+                        category: item.category,
+                        quantity: item.quantity,
+                        price: item.price,
+                        description: item.description,
+                        created_at: item.createdAt
+                    });
+                }
+
+                console.log('Dados sincronizados com sucesso!');
+            } catch (error) {
+                console.error('Erro ao sincronizar dados:', error);
+            }
+        }
+
+        function showMainSystem() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('datacenterScreen').classList.add('hidden');
+            document.getElementById('mainSystem').classList.remove('hidden');
+            
+            document.getElementById('currentUser').textContent = currentUser;
+            renderItems();
+            renderUsers();
+        }
+
+        function showSection(sectionName) {
+            // Atualizar navegação
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active', 'text-white', 'border-white');
+                btn.classList.add('text-indigo-200');
+            });
+            
+            document.querySelector(`[data-section="${sectionName}"]`).classList.add('active', 'text-white', 'border-white');
+            document.querySelector(`[data-section="${sectionName}"]`).classList.remove('text-indigo-200');
+
+            // Mostrar seção
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            document.getElementById(`${sectionName}Section`).classList.remove('hidden');
+        }
 
         function logout() {
             currentUser = null;
-            activeTrip = null;
-            hideAllScreens();
+            localStorage.removeItem('currentUser');
+            document.getElementById('mainSystem').classList.add('hidden');
             document.getElementById('loginScreen').classList.remove('hidden');
+            
+            // Limpar formulários
             document.getElementById('loginForm').reset();
         }
 
-        function hideAllScreens() {
-            const screens = [
-                'loginScreen', 'adminDashboard', 'driverDashboard', 
-                'userManagementScreen', 'vehicleManagementScreen', 
-                'reportsScreen', 'tripStatusScreen', 'dataCenterScreen'
-            ];
-            screens.forEach(screen => {
-                document.getElementById(screen).classList.add('hidden');
-            });
-        }
-
-        // Navigation functions
-        function showAdminDashboard() {
-            hideAllScreens();
-            document.getElementById('adminDashboard').classList.remove('hidden');
-        }
-
-        function showUserManagement() {
-            hideAllScreens();
-            document.getElementById('userManagementScreen').classList.remove('hidden');
-            showAddUserTab();
-            updateUsersTable();
-        }
-
-        function showVehicleManagement() {
-            hideAllScreens();
-            document.getElementById('vehicleManagementScreen').classList.remove('hidden');
-            showAddVehicleTab();
-            updateVehiclesTable();
-        }
-
-        function showReports() {
-            hideAllScreens();
-            document.getElementById('reportsScreen').classList.remove('hidden');
-            updateDashboardStats();
-            updateReportDrivers();
-        }
-
-        function showTripStatus() {
-            hideAllScreens();
-            document.getElementById('tripStatusScreen').classList.remove('hidden');
-            updateTripStatusStats();
-            showActiveTrips();
-        }
-
-        function showDataCenter() {
-            if (currentUser.role !== 'admin') {
-                alert('Acesso negado! Apenas administradores podem acessar o Data Center.');
-                return;
+        function openItemModal(item = null) {
+            const modal = document.getElementById('itemModal');
+            const title = document.getElementById('itemModalTitle');
+            const form = document.getElementById('itemForm');
+            
+            if (item) {
+                title.textContent = 'Editar Item';
+                document.getElementById('itemId').value = item.id;
+                document.getElementById('itemName').value = item.name;
+                document.getElementById('itemCategory').value = item.category;
+                document.getElementById('itemQuantity').value = item.quantity;
+                document.getElementById('itemPrice').value = item.price;
+                document.getElementById('itemDescription').value = item.description || '';
+            } else {
+                title.textContent = 'Adicionar Item';
+                form.reset();
+                document.getElementById('itemId').value = '';
             }
-            hideAllScreens();
-            document.getElementById('dataCenterScreen').classList.remove('hidden');
+            
+            modal.classList.remove('hidden');
         }
 
-        // User Management
-        function showAddUserTab() {
-            document.getElementById('addUserContent').classList.remove('hidden');
-            document.getElementById('listUsersContent').classList.add('hidden');
-            
-            document.getElementById('addUserTab').className = 'px-4 py-2 bg-green-500 text-white rounded-lg transition-colors duration-300';
-            document.getElementById('listUsersTab').className = 'px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors duration-300';
+        function closeItemModal() {
+            document.getElementById('itemModal').classList.add('hidden');
+            document.getElementById('itemForm').reset();
         }
 
-        function showListUsersTab() {
-            document.getElementById('addUserContent').classList.add('hidden');
-            document.getElementById('listUsersContent').classList.remove('hidden');
-            
-            document.getElementById('addUserTab').className = 'px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors duration-300';
-            document.getElementById('listUsersTab').className = 'px-4 py-2 bg-green-500 text-white rounded-lg transition-colors duration-300';
-            
-            updateUsersTable();
+        function openUserModal() {
+            document.getElementById('userModal').classList.remove('hidden');
         }
 
-        document.getElementById('userForm').addEventListener('submit', function(e) {
+        function closeUserModal() {
+            document.getElementById('userModal').classList.add('hidden');
+            document.getElementById('userForm').reset();
+        }
+
+        async function handleItemSubmit(e) {
             e.preventDefault();
-            const name = document.getElementById('newUserName').value.trim();
-            const username = document.getElementById('newUsername').value.trim();
-            const password = document.getElementById('newPassword').value;
-            const role = document.getElementById('newUserRole').value;
             
-            if (!name || !username || !password || !role) {
-                alert('Preencha todos os campos!');
-                return;
+            const itemData = {
+                name: document.getElementById('itemName').value,
+                category: document.getElementById('itemCategory').value,
+                quantity: parseInt(document.getElementById('itemQuantity').value),
+                price: parseFloat(document.getElementById('itemPrice').value),
+                description: document.getElementById('itemDescription').value
+            };
+
+            const itemId = document.getElementById('itemId').value;
+            
+            if (itemId) {
+                // Editar item existente
+                const index = items.findIndex(item => item.id == itemId);
+                if (index !== -1) {
+                    items[index] = { ...items[index], ...itemData };
+                    
+                    if (supabase) {
+                        await supabase.from('items').update(itemData).eq('id', itemId);
+                    }
+                    
+                    showNotification('Item atualizado com sucesso!', 'success');
+                }
+            } else {
+                // Adicionar novo item
+                const newItem = {
+                    id: Date.now(),
+                    ...itemData,
+                    createdAt: new Date().toISOString()
+                };
+                
+                items.push(newItem);
+                
+                if (supabase) {
+                    await supabase.from('items').insert(newItem);
+                }
+                
+                showNotification('Item adicionado com sucesso!', 'success');
             }
             
-            if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
-                alert('Este nome de usuário já existe!');
-                return;
-            }
+            renderItems();
+            updateCategoryFilter();
+            closeItemModal();
+        }
+
+        async function handleUserSubmit(e) {
+            e.preventDefault();
             
-            if (password.length < 6) {
-                alert('A senha deve ter pelo menos 6 caracteres!');
+            const username = document.getElementById('newUsername').value;
+            const password = document.getElementById('newUserPassword').value;
+            
+            // Verificar se usuário já existe
+            if (users.find(u => u.username === username)) {
+                showNotification('Usuário já existe!', 'error');
                 return;
             }
             
             const newUser = {
                 id: Date.now(),
-                name: name,
-                username: username,
-                password: password,
-                role: role
+                username,
+                password,
+                createdAt: new Date().toISOString()
             };
             
             users.push(newUser);
-            saveLocalData();
             
-            alert(`${role === 'gestor' ? 'Gestor' : 'Motorista'} cadastrado com sucesso!`);
-            this.reset();
-            updateUsersTable();
-            updateReportDrivers();
-        });
-
-        function updateUsersTable() {
-            const tbody = document.getElementById('usersTableBody');
-            
-            if (users.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="4" class="border border-gray-300 dark:border-gray-600 px-4 py-8 text-center text-gray-500 dark:text-gray-400">
-                            Nenhum usuário cadastrado
-                        </td>
-                    </tr>
-                `;
-                return;
+            if (supabase) {
+                await supabase.from('users').insert(newUser);
             }
             
-            tbody.innerHTML = users.map(user => `
-                <tr>
-                    <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">${user.name}</td>
-                    <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">${user.username}</td>
-                    <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">
-                        <span class="px-2 py-1 rounded text-xs font-medium ${user.role === 'admin' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : user.role === 'gestor' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'}">
-                            ${user.role === 'admin' ? 'ADMINISTRADOR' : user.role === 'gestor' ? 'GESTOR' : 'MOTORISTA'}
-                        </span>
-                    </td>
-                    <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">
-                        ${user.role !== 'admin' ? `
-                            <button onclick="deleteUser(${user.id})" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors duration-300">
-                                Excluir
-                            </button>
-                        ` : '<span class="text-gray-500 dark:text-gray-400 text-sm">PROTEGIDO</span>'}
-                    </td>
-                </tr>
-            `).join('');
+            renderUsers();
+            closeUserModal();
+            showNotification('Usuário criado com sucesso!', 'success');
         }
 
-        function deleteUser(userId) {
-            const user = users.find(u => u.id === userId);
-            
-            if (confirm(`Tem certeza que deseja excluir o usuário ${user.name}?`)) {
-                const index = users.findIndex(u => u.id === userId);
-                users.splice(index, 1);
-                saveLocalData();
-                updateUsersTable();
-                alert('Usuário excluído com sucesso!');
-            }
-        }
-
-        // Vehicle Management
-        function showAddVehicleTab() {
-            document.getElementById('addVehicleContent').classList.remove('hidden');
-            document.getElementById('listVehiclesContent').classList.add('hidden');
-            
-            document.getElementById('addVehicleTab').className = 'px-4 py-2 bg-blue-500 text-white rounded-lg transition-colors duration-300';
-            document.getElementById('listVehiclesTab').className = 'px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors duration-300';
-        }
-
-        function showListVehiclesTab() {
-            document.getElementById('addVehicleContent').classList.add('hidden');
-            document.getElementById('listVehiclesContent').classList.remove('hidden');
-            
-            document.getElementById('addVehicleTab').className = 'px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors duration-300';
-            document.getElementById('listVehiclesTab').className = 'px-4 py-2 bg-blue-500 text-white rounded-lg transition-colors duration-300';
-            
-            updateVehiclesTable();
-        }
-
-        document.getElementById('vehicleForm').addEventListener('submit', function(e) {
+        async function handlePasswordChange(e) {
             e.preventDefault();
-            const plate = document.getElementById('vehiclePlate').value.toUpperCase();
-            const brand = document.getElementById('vehicleBrand').value;
-            const model = document.getElementById('vehicleModel').value;
-            const year = document.getElementById('vehicleYear').value;
             
-            if (vehicles.find(v => v.plate === plate)) {
-                alert('Veículo já cadastrado!');
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            const user = users.find(u => u.username === currentUser);
+            
+            if (!user || user.password !== currentPassword) {
+                showNotification('Senha atual incorreta!', 'error');
                 return;
             }
             
-            const newVehicle = {
-                id: Date.now(),
-                plate: plate,
-                brand: brand,
-                model: model,
-                year: parseInt(year),
-                available: true
-            };
+            if (newPassword !== confirmPassword) {
+                showNotification('As senhas não coincidem!', 'error');
+                return;
+            }
             
-            vehicles.push(newVehicle);
-            saveLocalData();
+            user.password = newPassword;
             
-            alert('Veículo cadastrado com sucesso!');
-            this.reset();
-            updateVehiclesTable();
-            updateVehicleSelect();
-        });
+            if (supabase) {
+                await supabase.from('users').update({ password: newPassword }).eq('username', currentUser);
+            }
+            
+            document.getElementById('changePasswordForm').reset();
+            showNotification('Senha alterada com sucesso!', 'success');
+        }
 
-        function updateVehiclesTable() {
-            const tbody = document.getElementById('vehiclesTableBody');
+        function renderItems() {
+            const tbody = document.getElementById('itemsTable');
+            tbody.innerHTML = '';
             
-            if (vehicles.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="border border-gray-300 dark:border-gray-600 px-4 py-8 text-center text-gray-500 dark:text-gray-400">
-                            Nenhum veículo cadastrado
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            tbody.innerHTML = vehicles.map(vehicle => `
-                <tr>
-                    <td class="border border-gray-300 dark:border-gray-600 px-4 py-2 font-mono">${vehicle.plate}</td>
-                    <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">${vehicle.brand}</td>
-                    <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">${vehicle.model}</td>
-                    <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">${vehicle.year}</td>
-                    <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">
-                        <span class="px-2 py-1 rounded text-xs font-medium ${vehicle.available ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}">
-                            ${vehicle.available ? 'Disponível' : 'Em Uso'}
+            items.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                
+                const stockStatus = getStockStatus(item.quantity);
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${item.name}</div>
+                        <div class="text-sm text-gray-500">${item.description || ''}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.category}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.quantity}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">R$ ${item.price.toFixed(2)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${stockStatus.class}">
+                            ${stockStatus.text}
                         </span>
                     </td>
-                    <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">
-                        <button onclick="deleteVehicle(${vehicle.id})" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors duration-300">
-                            Excluir
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button onclick="openItemModal(${JSON.stringify(item).replace(/"/g, '&quot;')})" class="text-indigo-600 hover:text-indigo-900 mr-3">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteItem(${item.id})" class="text-red-600 hover:text-red-900">
+                            <i class="fas fa-trash"></i>
                         </button>
                     </td>
-                </tr>
-            `).join('');
-        }
-
-        function deleteVehicle(vehicleId) {
-            const vehicle = vehicles.find(v => v.id === vehicleId);
-            
-            const activeTrip = trips.find(t => t.vehicleId === vehicleId && t.status === 'active');
-            if (activeTrip) {
-                alert('Não é possível excluir um veículo que está em uso!');
-                return;
-            }
-            
-            if (confirm(`Tem certeza que deseja excluir o veículo ${vehicle.plate}?`)) {
-                const index = vehicles.findIndex(v => v.id === vehicleId);
-                vehicles.splice(index, 1);
-                saveLocalData();
-                updateVehiclesTable();
-                updateVehicleSelect();
-                alert('Veículo excluído com sucesso!');
-            }
-        }
-
-        // Driver functions
-        function loadDriverData() {
-            document.getElementById('loggedDriverName').textContent = currentUser.name;
-            updateVehicleSelect();
-            checkActiveTrip();
-            updateDriverStats();
-            updateDriverTrips();
-        }
-
-        function updateVehicleSelect() {
-            const vehicleSelect = document.getElementById('vehicleSelect');
-            if (!vehicleSelect) return;
-            
-            vehicleSelect.innerHTML = '<option value="">Selecione o veículo</option>';
-            vehicles.filter(v => v.available).forEach(vehicle => {
-                const option = document.createElement('option');
-                option.value = vehicle.id;
-                option.textContent = `${vehicle.plate} - ${vehicle.model} (${vehicle.year})`;
-                vehicleSelect.appendChild(option);
+                `;
+                
+                tbody.appendChild(row);
             });
         }
 
-        function checkActiveTrip() {
-            const userActiveTrip = trips.find(t => t.driverId === currentUser.id && t.status === 'active');
-            if (userActiveTrip) {
-                activeTrip = userActiveTrip;
-                showActiveTripDisplay();
+        function renderUsers() {
+            const tbody = document.getElementById('usersTable');
+            tbody.innerHTML = '';
+            
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${user.username}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(user.createdAt).toLocaleDateString('pt-BR')}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            Ativo
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        ${user.username !== currentUser ? `
+                            <button onclick="deleteUser(${user.id})" class="text-red-600 hover:text-red-900">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        ` : '<span class="text-gray-400">Usuário atual</span>'}
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        function getStockStatus(quantity) {
+            if (quantity <= 5) {
+                return { class: 'bg-red-100 text-red-800', text: 'Estoque Baixo' };
+            } else if (quantity >= 50) {
+                return { class: 'bg-blue-100 text-blue-800', text: 'Estoque Alto' };
             } else {
-                showStartTripForm();
+                return { class: 'bg-green-100 text-green-800', text: 'Normal' };
             }
         }
 
-        function showStartTripForm() {
-            document.getElementById('startTripForm').classList.remove('hidden');
-            document.getElementById('activeTripDisplay').classList.add('hidden');
-        }
-
-        function showActiveTripDisplay() {
-            document.getElementById('startTripForm').classList.add('hidden');
-            document.getElementById('activeTripDisplay').classList.remove('hidden');
+        function updateCategoryFilter() {
+            const select = document.getElementById('categoryFilter');
+            const categories = [...new Set(items.map(item => item.category))];
             
-            const vehicle = vehicles.find(v => v.id === activeTrip.vehicleId);
-            const driver = users.find(u => u.id === activeTrip.driverId);
-            
-            document.getElementById('tripDetails').innerHTML = `
-                <p><strong>Motorista:</strong> ${driver.name}</p>
-                <p><strong>Veículo:</strong> ${vehicle.plate} - ${vehicle.model}</p>
-                <p><strong>Destino:</strong> ${activeTrip.destination}</p>
-                <p><strong>Início:</strong> ${new Date(activeTrip.startTime).toLocaleString('pt-BR')}</p>
-                <p><strong>KM Inicial:</strong> ${activeTrip.initialKm}</p>
-            `;
-        }
-
-        function startTrip() {
-            const driverId = currentUser.id;
-            const vehicleId = document.getElementById('vehicleSelect').value;
-            const initialKm = document.getElementById('initialKm').value;
-            const destination = document.getElementById('destination').value;
-            
-            if (!vehicleId || !initialKm || !destination) {
-                alert('Preencha todos os campos!');
-                return;
-            }
-            
-            const vehicle = vehicles.find(v => v.id == vehicleId);
-            if (!vehicle.available) {
-                alert('Veículo não disponível!');
-                return;
-            }
-            
-            const trip = {
-                id: Date.now(),
-                driverId: parseInt(driverId),
-                vehicleId: parseInt(vehicleId),
-                destination: destination,
-                initialKm: parseInt(initialKm),
-                startTime: new Date().toISOString(),
-                status: 'active'
-            };
-            
-            trips.push(trip);
-            activeTrip = trip;
-            
-            vehicle.available = false;
-            
-            saveLocalData();
-            showActiveTripDisplay();
-            alert('Viagem iniciada com sucesso!');
-        }
-
-        function endTrip() {
-            const finalKm = document.getElementById('finalKm').value;
-            
-            if (!finalKm) {
-                alert('Digite a quilometragem final!');
-                return;
-            }
-            
-            if (parseInt(finalKm) < activeTrip.initialKm) {
-                alert('A quilometragem final não pode ser menor que a inicial!');
-                return;
-            }
-            
-            activeTrip.finalKm = parseInt(finalKm);
-            activeTrip.endTime = new Date().toISOString();
-            activeTrip.status = 'completed';
-            activeTrip.kmTraveled = activeTrip.finalKm - activeTrip.initialKm;
-            
-            const vehicle = vehicles.find(v => v.id === activeTrip.vehicleId);
-            vehicle.available = true;
-            
-            saveLocalData();
-            
-            activeTrip = null;
-            showStartTripForm();
-            updateDriverStats();
-            updateDriverTrips();
-            
-            alert('Viagem encerrada com sucesso!');
-        }
-
-        function updateDriverStats() {
-            if (!currentUser || currentUser.role !== 'driver') return;
-            
-            const driverTrips = trips.filter(t => t.driverId === currentUser.id && t.status === 'completed');
-            const totalTrips = driverTrips.length;
-            const totalKm = driverTrips.reduce((sum, trip) => sum + (trip.kmTraveled || 0), 0);
-            
-            document.getElementById('driverTotalTrips').textContent = totalTrips;
-            document.getElementById('driverTotalKm').textContent = totalKm;
-        }
-
-        function updateDriverTrips() {
-            if (!currentUser || currentUser.role !== 'driver') return;
-            
-            const container = document.getElementById('driverTripsContainer');
-            const driverTrips = trips.filter(t => t.driverId === currentUser.id && t.status === 'completed')
-                                    .sort((a, b) => new Date(b.endTime) - new Date(a.endTime))
-                                    .slice(0, 10);
-            
-            if (driverTrips.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center text-gray-500 dark:text-gray-400 py-8">
-                        Nenhuma viagem realizada ainda
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = driverTrips.map(trip => {
-                const vehicle = vehicles.find(v => v.id === trip.vehicleId);
-                return `
-                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
-                        <div class="flex justify-between items-start">
-                            <div class="flex-1">
-                                <h4 class="font-bold text-gray-800 dark:text-white">${trip.destination}</h4>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
-                                    🚗 ${vehicle ? `${vehicle.plate} - ${vehicle.brand} ${vehicle.model}` : 'Veículo não encontrado'}
-                                </p>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
-                                    📅 ${new Date(trip.startTime).toLocaleDateString('pt-BR')}
-                                </p>
-                            </div>
-                            <div class="text-right">
-                                <div class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-sm font-bold">
-                                    ${trip.kmTraveled} KM
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Reports functions
-        function updateDashboardStats() {
-            const completedTrips = trips.filter(t => t.status === 'completed');
-            const totalTrips = completedTrips.length;
-            const totalKm = completedTrips.reduce((sum, trip) => sum + (trip.kmTraveled || 0), 0);
-            const activeDrivers = users.filter(u => u.role === 'driver' && trips.some(t => t.driverId === u.id && t.status === 'completed')).length;
-            const activeVehicles = vehicles.filter(v => trips.some(t => t.vehicleId === v.id && t.status === 'completed')).length;
-            
-            document.getElementById('dashTotalTrips').textContent = totalTrips;
-            document.getElementById('dashTotalKm').textContent = totalKm;
-            document.getElementById('dashActiveDrivers').textContent = activeDrivers;
-            document.getElementById('dashActiveVehicles').textContent = activeVehicles;
-        }
-
-        function updateReportDrivers() {
-            const reportDriver = document.getElementById('reportDriver');
-            if (!reportDriver) return;
-            
-            reportDriver.innerHTML = '<option value="">Todos os motoristas</option>';
-            users.filter(u => u.role === 'driver').forEach(driver => {
+            select.innerHTML = '<option value="">Todas as categorias</option>';
+            categories.forEach(category => {
                 const option = document.createElement('option');
-                option.value = driver.id;
-                option.textContent = driver.name;
-                reportDriver.appendChild(option);
+                option.value = category;
+                option.textContent = category;
+                select.appendChild(option);
             });
         }
 
-        function generateReport() {
-            const driverId = document.getElementById('reportDriver').value;
-            const period = parseInt(document.getElementById('reportPeriod').value);
+        function filterItems() {
+            const search = document.getElementById('searchItems').value.toLowerCase();
+            const category = document.getElementById('categoryFilter').value;
+            const stockFilter = document.getElementById('stockFilter').value;
             
-            const cutoffDate = new Date();
-            cutoffDate.setDate(cutoffDate.getDate() - period);
-            
-            let filteredTrips = trips.filter(t => 
-                t.status === 'completed' && 
-                new Date(t.endTime) >= cutoffDate
-            );
-            
-            if (driverId) {
-                filteredTrips = filteredTrips.filter(t => t.driverId == driverId);
-            }
-            
-            if (filteredTrips.length === 0) {
-                alert('Nenhuma viagem encontrada para o período selecionado!');
-                return;
-            }
-            
-            // Generate PDF using jsPDF
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            doc.setFontSize(20);
-            doc.text('Relatório de Viagens', 20, 20);
-            
-            doc.setFontSize(12);
-            doc.text(`Período: Últimos ${period} dias`, 20, 35);
-            doc.text(`Data de geração: ${new Date().toLocaleDateString('pt-BR')}`, 20, 45);
-            
-            let yPosition = 65;
-            
-            filteredTrips.forEach((trip, index) => {
-                const driver = users.find(u => u.id === trip.driverId);
-                const vehicle = vehicles.find(v => v.id === trip.vehicleId);
+            let filteredItems = items.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(search) || 
+                                    item.description.toLowerCase().includes(search);
+                const matchesCategory = !category || item.category === category;
                 
-                if (yPosition > 270) {
-                    doc.addPage();
-                    yPosition = 20;
+                let matchesStock = true;
+                if (stockFilter === 'low') matchesStock = item.quantity <= 5;
+                else if (stockFilter === 'normal') matchesStock = item.quantity > 5 && item.quantity < 50;
+                else if (stockFilter === 'high') matchesStock = item.quantity >= 50;
+                
+                return matchesSearch && matchesCategory && matchesStock;
+            });
+            
+            // Renderizar itens filtrados
+            const tbody = document.getElementById('itemsTable');
+            tbody.innerHTML = '';
+            
+            filteredItems.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                
+                const stockStatus = getStockStatus(item.quantity);
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${item.name}</div>
+                        <div class="text-sm text-gray-500">${item.description || ''}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.category}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.quantity}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">R$ ${item.price.toFixed(2)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${stockStatus.class}">
+                            ${stockStatus.text}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button onclick="openItemModal(${JSON.stringify(item).replace(/"/g, '&quot;')})" class="text-indigo-600 hover:text-indigo-900 mr-3">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteItem(${item.id})" class="text-red-600 hover:text-red-900">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        async function deleteItem(id) {
+            if (confirm('Tem certeza que deseja excluir este item?')) {
+                items = items.filter(item => item.id !== id);
+                
+                if (supabase) {
+                    await supabase.from('items').delete().eq('id', id);
                 }
                 
-                doc.text(`${index + 1}. ${driver ? driver.name : 'N/A'} - ${vehicle ? vehicle.plate : 'N/A'}`, 20, yPosition);
-                doc.text(`   Destino: ${trip.destination}`, 20, yPosition + 10);
-                doc.text(`   Data: ${new Date(trip.startTime).toLocaleDateString('pt-BR')}`, 20, yPosition + 20);
-                doc.text(`   KM: ${trip.kmTraveled}`, 20, yPosition + 30);
-                
-                yPosition += 45;
-            });
-            
-            const totalKm = filteredTrips.reduce((sum, trip) => sum + (trip.kmTraveled || 0), 0);
-            
-            if (yPosition > 250) {
-                doc.addPage();
-                yPosition = 20;
+                renderItems();
+                updateCategoryFilter();
+                showNotification('Item excluído com sucesso!', 'success');
             }
-            
-            doc.setFontSize(14);
-            doc.text(`Total de viagens: ${filteredTrips.length}`, 20, yPosition + 20);
-            doc.text(`Total de KM: ${totalKm}`, 20, yPosition + 35);
-            
-            doc.save(`relatorio-viagens-${new Date().toISOString().split('T')[0]}.pdf`);
         }
 
-        // Trip Status functions
-        function updateTripStatusStats() {
-            const activeTripsCount = trips.filter(t => t.status === 'active').length;
-            const completedTripsCount = trips.filter(t => t.status === 'completed').length;
-            const totalKm = trips.filter(t => t.status === 'completed').reduce((sum, trip) => sum + (trip.kmTraveled || 0), 0);
-            
-            document.getElementById('activeTripsCount').textContent = activeTripsCount;
-            document.getElementById('completedTripsCount').textContent = completedTripsCount;
-            document.getElementById('totalKmCount').textContent = totalKm;
-        }
-
-        function showActiveTrips() {
-            document.getElementById('activeTripsContent').classList.remove('hidden');
-            document.getElementById('completedTripsContent').classList.add('hidden');
-            
-            document.getElementById('activeTripsTab').className = 'px-6 py-3 bg-green-500 text-white rounded-xl font-bold transition-all duration-300';
-            document.getElementById('completedTripsTab').className = 'px-6 py-3 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-bold transition-all duration-300';
-            
-            updateActiveTripsDisplay();
-        }
-
-        function showCompletedTrips() {
-            document.getElementById('activeTripsContent').classList.add('hidden');
-            document.getElementById('completedTripsContent').classList.remove('hidden');
-            
-            document.getElementById('activeTripsTab').className = 'px-6 py-3 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-bold transition-all duration-300';
-            document.getElementById('completedTripsTab').className = 'px-6 py-3 bg-green-500 text-white rounded-xl font-bold transition-all duration-300';
-            
-            updateCompletedTripsDisplay();
-        }
-
-        function updateActiveTripsDisplay() {
-            const container = document.getElementById('activeTripsCards');
-            const activeTrips = trips.filter(t => t.status === 'active');
-            
-            if (activeTrips.length === 0) {
-                container.innerHTML = `
-                    <div class="col-span-full text-center text-gray-500 dark:text-gray-400 py-12">
-                        <div class="text-6xl mb-4">🚗</div>
-                        <p class="text-xl font-medium">Nenhuma viagem em andamento</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = activeTrips.map(trip => {
-                const driver = users.find(u => u.id === trip.driverId);
-                const vehicle = vehicles.find(v => v.id === trip.vehicleId);
+        async function deleteUser(id) {
+            if (confirm('Tem certeza que deseja excluir este usuário?')) {
+                users = users.filter(user => user.id !== id);
                 
-                return `
-                    <div class="bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800 rounded-xl p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-bold text-green-800 dark:text-green-300">🚗 EM TRÂNSITO</h3>
-                            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold">ATIVO</span>
-                        </div>
-                        <div class="space-y-2 text-gray-700 dark:text-gray-300">
-                            <p><strong>Motorista:</strong> ${driver ? driver.name : 'N/A'}</p>
-                            <p><strong>Veículo:</strong> ${vehicle ? `${vehicle.plate} - ${vehicle.model}` : 'N/A'}</p>
-                            <p><strong>Destino:</strong> ${trip.destination}</p>
-                            <p><strong>Início:</strong> ${new Date(trip.startTime).toLocaleString('pt-BR')}</p>
-                            <p><strong>KM Inicial:</strong> ${trip.initialKm}</p>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function updateCompletedTripsDisplay() {
-            const tbody = document.getElementById('completedTripsBody');
-            const completedTrips = trips.filter(t => t.status === 'completed')
-                                        .sort((a, b) => new Date(b.endTime) - new Date(a.endTime));
-            
-            if (completedTrips.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                            <div class="text-6xl mb-4">🏁</div>
-                            <p class="text-xl font-medium">Nenhuma viagem encerrada</p>
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            tbody.innerHTML = completedTrips.map(trip => {
-                const driver = users.find(u => u.id === trip.driverId);
-                const vehicle = vehicles.find(v => v.id === trip.vehicleId);
+                if (supabase) {
+                    await supabase.from('users').delete().eq('id', id);
+                }
                 
-                return `
-                    <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <td class="px-6 py-4">${driver ? driver.name : 'N/A'}</td>
-                        <td class="px-6 py-4 font-mono">${vehicle ? `${vehicle.plate} - ${vehicle.model}` : 'N/A'}</td>
-                        <td class="px-6 py-4">${trip.destination}</td>
-                        <td class="px-6 py-4">${new Date(trip.startTime).toLocaleString('pt-BR')}</td>
-                        <td class="px-6 py-4">${new Date(trip.endTime).toLocaleString('pt-BR')}</td>
-                        <td class="px-6 py-4">
-                            <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-sm font-bold">
-                                ${trip.kmTraveled} KM
-                            </span>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
+                renderUsers();
+                showNotification('Usuário excluído com sucesso!', 'success');
+            }
         }
 
-        // Supabase functions (enhanced implementation)
-        function showConnectionStatus(type, title, message, icon) {
-            const statusDiv = document.getElementById('connectionStatus');
-            const statusIcon = document.getElementById('statusIcon');
-            const statusTitle = document.getElementById('statusTitle');
-            const statusMessage = document.getElementById('statusMessage');
+        function exportToCSV() {
+            const headers = ['ID', 'Nome', 'Categoria', 'Quantidade', 'Preço', 'Descrição', 'Data de Criação'];
+            const csvContent = [
+                headers.join(','),
+                ...items.map(item => [
+                    item.id,
+                    `"${item.name}"`,
+                    `"${item.category}"`,
+                    item.quantity,
+                    item.price,
+                    `"${item.description || ''}"`,
+                    `"${new Date(item.createdAt).toLocaleDateString('pt-BR')}"`
+                ].join(','))
+            ].join('\n');
             
-            statusDiv.className = `p-4 rounded-lg border-2 ${
-                type === 'success' ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-300' :
-                type === 'error' ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-300' :
-                'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-300'
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `estoque_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('Arquivo CSV exportado com sucesso!', 'success');
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
             }`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
             
-            statusIcon.textContent = icon;
-            statusTitle.textContent = title;
-            statusMessage.textContent = message;
-            statusDiv.classList.remove('hidden');
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
         }
-
-        async function testConnection() {
-            const url = document.getElementById('supabaseUrl').value.trim();
-            const key = document.getElementById('supabaseKey').value.trim();
-            const testBtn = document.getElementById('testBtn');
-            const testBtnIcon = document.getElementById('testBtnIcon');
-            const testBtnText = document.getElementById('testBtnText');
-            
-            if (!url || !key) {
-                showConnectionStatus('error', 'Erro de Configuração', 'Por favor, preencha a URL e a chave do Supabase!', '❌');
-                return;
-            }
-            
-            // Update button to loading state
-            testBtn.disabled = true;
-            testBtnIcon.textContent = '⏳';
-            testBtnText.textContent = 'Testando...';
-            
-            try {
-                // Initialize Supabase client
-                const { createClient } = supabase;
-                const supabaseClient = createClient(url, key);
-                
-                // Test 1: Basic connection
-                showConnectionStatus('warning', 'Testando Conexão...', 'Verificando conectividade com o Supabase...', '⏳');
-                
-                // Test 2: Check if we can query users table
-                const { data, error } = await supabaseClient
-                    .from('users')
-                    .select('count', { count: 'exact', head: true });
-                
-                if (error) {
-                    throw new Error(`Erro na consulta: ${error.message}`);
-                }
-                
-                // Test 3: Check table structure
-                const { data: tableData, error: tableError } = await supabaseClient
-                    .from('users')
-                    .select('*')
-                    .limit(1);
-                
-                if (tableError) {
-                    throw new Error(`Erro ao verificar estrutura: ${tableError.message}`);
-                }
-                
-                // Success
-                showConnectionStatus('success', 'Conexão Bem-Sucedida! ✅', 
-                    `Conectado ao Supabase com sucesso. Tabelas encontradas e funcionais.`, '✅');
-                
-                // Save working config
-                supabaseConfig.url = url;
-                supabaseConfig.key = key;
-                localStorage.setItem('supabaseConfig', JSON.stringify(supabaseConfig));
-                
-                // Show database info
-                await showDatabaseInfo(supabaseClient);
-                
-            } catch (error) {
-                console.error('Erro de conexão:', error);
-                showConnectionStatus('error', 'Falha na Conexão ❌', 
-                    `Erro: ${error.message}. Verifique as credenciais e se as tabelas foram criadas.`, '❌');
-            } finally {
-                // Reset button
-                testBtn.disabled = false;
-                testBtnIcon.textContent = '🔍';
-                testBtnText.textContent = 'Testar Conexão';
-            }
-        }
-
-        async function showDatabaseInfo(client) {
-            try {
-                const infoDiv = document.getElementById('databaseInfo');
-                const tablesList = document.getElementById('tablesList');
-                
-                // Check each table
-                const tables = [
-                    { name: 'users', label: 'Usuários' },
-                    { name: 'vehicles', label: 'Veículos' },
-                    { name: 'trips', label: 'Viagens' }
-                ];
-                
-                let tableInfo = '';
-                
-                for (const table of tables) {
-                    try {
-                        const { count, error } = await client
-                            .from(table.name)
-                            .select('*', { count: 'exact', head: true });
-                        
-                        if (error) throw error;
-                        
-                        tableInfo += `
-                            <div class="flex justify-between items-center p-2 bg-white dark:bg-gray-800 rounded border">
-                                <span class="font-medium">📋 ${table.label}</span>
-                                <span class="text-green-600 dark:text-green-400 font-bold">${count || 0} registros</span>
-                            </div>
-                        `;
-                    } catch (error) {
-                        tableInfo += `
-                            <div class="flex justify-between items-center p-2 bg-white dark:bg-gray-800 rounded border">
-                                <span class="font-medium">📋 ${table.label}</span>
-                                <span class="text-red-600 dark:text-red-400 font-bold">Erro</span>
-                            </div>
-                        `;
-                    }
-                }
-                
-                tablesList.innerHTML = tableInfo;
-                infoDiv.classList.remove('hidden');
-                
-            } catch (error) {
-                console.error('Erro ao obter informações do banco:', error);
-            }
-        }
-
-        async function testTables() {
-            const url = document.getElementById('supabaseUrl').value.trim();
-            const key = document.getElementById('supabaseKey').value.trim();
-            
-            if (!url || !key) {
-                showConnectionStatus('error', 'Erro de Configuração', 'Configure a conexão primeiro!', '❌');
-                return;
-            }
-            
-            try {
-                const { createClient } = supabase;
-                const supabaseClient = createClient(url, key);
-                
-                showConnectionStatus('warning', 'Verificando Tabelas...', 'Testando estrutura do banco de dados...', '⏳');
-                
-                // Test each table structure
-                const tests = [
-                    { table: 'users', required: ['id', 'name', 'username', 'password', 'role'] },
-                    { table: 'vehicles', required: ['id', 'plate', 'brand', 'model', 'year', 'available'] },
-                    { table: 'trips', required: ['id', 'driver_id', 'vehicle_id', 'destination', 'initial_km', 'status'] }
-                ];
-                
-                let allGood = true;
-                let results = [];
-                
-                for (const test of tests) {
-                    try {
-                        const { data, error } = await supabaseClient
-                            .from(test.table)
-                            .select('*')
-                            .limit(1);
-                        
-                        if (error) throw error;
-                        
-                        results.push(`✅ Tabela '${test.table}' - OK`);
-                    } catch (error) {
-                        allGood = false;
-                        results.push(`❌ Tabela '${test.table}' - ${error.message}`);
-                    }
-                }
-                
-                if (allGood) {
-                    showConnectionStatus('success', 'Todas as Tabelas OK! ✅', 
-                        'Estrutura do banco de dados verificada com sucesso.', '✅');
-                } else {
-                    showConnectionStatus('error', 'Problemas Encontrados ❌', 
-                        'Algumas tabelas estão com problemas. Execute o script SQL completo.', '❌');
-                }
-                
-                // Show detailed results
-                console.log('Resultados dos testes:', results);
-                
-            } catch (error) {
-                showConnectionStatus('error', 'Erro no Teste ❌', 
-                    `Erro ao testar tabelas: ${error.message}`, '❌');
-            }
-        }
-
-        function saveConfig() {
-            const url = document.getElementById('supabaseUrl').value.trim();
-            const key = document.getElementById('supabaseKey').value.trim();
-            
-            if (!url || !key) {
-                showConnectionStatus('error', 'Erro de Configuração', 'Preencha todos os campos antes de salvar!', '❌');
-                return;
-            }
-            
-            supabaseConfig.url = url;
-            supabaseConfig.key = key;
-            
-            localStorage.setItem('supabaseConfig', JSON.stringify(supabaseConfig));
-            showConnectionStatus('success', 'Configuração Salva! ✅', 
-                'Credenciais salvas no navegador com sucesso.', '💾');
-        }
-
-        async function syncData() {
-            const url = document.getElementById('supabaseUrl').value.trim();
-            const key = document.getElementById('supabaseKey').value.trim();
-            
-            if (!url || !key) {
-                showConnectionStatus('error', 'Erro de Configuração', 'Configure a conexão primeiro!', '❌');
-                return;
-            }
-            
-            try {
-                const { createClient } = supabase;
-                const supabaseClient = createClient(url, key);
-                
-                showConnectionStatus('warning', 'Sincronizando...', 'Enviando dados locais para o Supabase...', '🔄');
-                
-                let syncCount = 0;
-                
-                // Sync users (except admin)
-                for (const user of users) {
-                    if (user.username !== 'admin') {
-                        const { error } = await supabaseClient
-                            .from('users')
-                            .upsert(user, { onConflict: 'username' });
-                        
-                        if (!error) syncCount++;
-                    }
-                }
-                
-                // Sync vehicles
-                for (const vehicle of vehicles) {
-                    const { error } = await supabaseClient
-                        .from('vehicles')
-                        .upsert(vehicle, { onConflict: 'plate' });
-                    
-                    if (!error) syncCount++;
-                }
-                
-                // Sync trips
-                for (const trip of trips) {
-                    const { error } = await supabaseClient
-                        .from('trips')
-                        .upsert({
-                            ...trip,
-                            driver_id: trip.driverId,
-                            vehicle_id: trip.vehicleId,
-                            initial_km: trip.initialKm,
-                            final_km: trip.finalKm,
-                            km_traveled: trip.kmTraveled,
-                            start_time: trip.startTime,
-                            end_time: trip.endTime
-                        });
-                    
-                    if (!error) syncCount++;
-                }
-                
-                showConnectionStatus('success', 'Sincronização Concluída! ✅', 
-                    `${syncCount} registros sincronizados com sucesso.`, '✅');
-                
-            } catch (error) {
-                showConnectionStatus('error', 'Erro na Sincronização ❌', 
-                    `Erro: ${error.message}`, '❌');
-            }
-        }
-
-        // Load saved config on page load
-        function loadSupabaseConfig() {
-            const saved = localStorage.getItem('supabaseConfig');
-            if (saved) {
-                const config = JSON.parse(saved);
-                document.getElementById('supabaseUrl').value = config.url || '';
-                document.getElementById('supabaseKey').value = config.key || '';
-                supabaseConfig = config;
-            }
-        }
-
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            initApp();
-        });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97e22e78b1d44468',t:'MTc1NzcwOTIyNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97e2b86372c30cad',t:'MTc1NzcxNDg3My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
