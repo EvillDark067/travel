@@ -593,15 +593,16 @@
     
     <!-- Importar biblioteca do Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const SUPABASE_URL = "https://qlwxnwtzhsrdbnaohmbi.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsd3hud3R6aHNyZGJuYW9obWJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3MTQ2MTAsImV4cCI6MjA3MzI5MDYxMH0.WeXrw-jPYmgHBNQEsbrSq-s3IqTNWDWLqOkWznQ6N84";
+    
+    <script>
+        // Substitua pelos seus dados reais do Supabase
+         const SUPABASE_URL = "https://qlwxnwtzhsrdbnaohmbi.supabase.co";
+         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsd3hud3R6aHNyZGJuYW9obWJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3MTQ2MTAsImV4cCI6MjA3MzI5MDYxMH0.WeXrw-jPYmgHBNQEsbrSq-s3IqTNWDWLqOkWznQ6N84";
 
-  // CORRETO: usar o global `supabase` fornecido pelo script UMD
+        // CORRETO: usar o global `supabase` fornecido pelo script UMD
   const { createClient } = supabase;
   const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  // teste rápido: tenta ler 1 linha da tabela 'estoque' e veja o console
+        // teste rápido: tenta ler 1 linha da tabela 'estoque' e veja o console
   async function testarConexao() {
     const { data, error } = await supabaseClient
       .from('estoque')   // verifique se o nome da tabela é exatamente esse
@@ -609,8 +610,9 @@
       .limit(1);
     console.log({ data, error });
   }
-  testarConexao();
-</script>
+        
+     testarConexao();
+
 
         // ============================================
         // FUNÇÕES DE INTEGRAÇÃO COM SUPABASE
