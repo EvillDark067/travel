@@ -612,27 +612,67 @@
             </div>
 
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">URL do Projeto</label>
-                        <input type="url" id="supabaseUrl" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="https://seu-projeto.supabase.co">
+                <div class="space-y-6">
+                    <!-- Connection Status -->
+                    <div id="connectionStatus" class="hidden p-4 rounded-lg border-2">
+                        <div class="flex items-center space-x-3">
+                            <div id="statusIcon" class="text-2xl"></div>
+                            <div>
+                                <h4 id="statusTitle" class="font-bold"></h4>
+                                <p id="statusMessage" class="text-sm"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configuration Form -->
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">URL do Projeto Supabase</label>
+                            <input type="url" id="supabaseUrl" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="https://seu-projeto.supabase.co">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Encontre em: Settings → API → Project URL</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Anon Key</label>
+                            <input type="password" id="supabaseKey" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Encontre em: Settings → API → Project API keys → anon public</p>
+                        </div>
                     </div>
                     
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Anon Key</label>
-                        <input type="password" id="supabaseKey" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
-                    </div>
-                    
-                    <div class="flex space-x-3 pt-4">
-                        <button onclick="testConnection()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg transition-colors duration-300 font-semibold">
-                            Testar Conexão
+                    <!-- Action Buttons -->
+                    <div class="flex flex-wrap gap-3 pt-4">
+                        <button id="testBtn" onclick="testConnection()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg transition-colors duration-300 font-semibold flex items-center space-x-2">
+                            <span id="testBtnIcon">🔍</span>
+                            <span id="testBtnText">Testar Conexão</span>
                         </button>
                         <button onclick="saveConfig()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors duration-300 font-semibold">
-                            Salvar Configuração
+                            💾 Salvar Configuração
                         </button>
                         <button onclick="syncData()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors duration-300 font-semibold">
-                            Sincronizar Dados
+                            🔄 Sincronizar Dados
                         </button>
+                        <button onclick="testTables()" class="bg-purple-500 hover:bg-purple-600 text-white px-6 py-3 rounded-lg transition-colors duration-300 font-semibold">
+                            📋 Verificar Tabelas
+                        </button>
+                    </div>
+
+                    <!-- Database Info -->
+                    <div id="databaseInfo" class="hidden bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                        <h4 class="font-bold text-gray-800 dark:text-white mb-3">📊 Informações do Banco</h4>
+                        <div id="tablesList" class="space-y-2"></div>
+                    </div>
+
+                    <!-- Instructions -->
+                    <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                        <h4 class="font-bold text-blue-800 dark:text-blue-300 mb-2">📖 Como Configurar:</h4>
+                        <ol class="text-sm text-blue-700 dark:text-blue-400 space-y-1 list-decimal list-inside">
+                            <li>Acesse seu projeto no <a href="https://supabase.com" target="_blank" class="underline">Supabase</a></li>
+                            <li>Vá em Settings → API</li>
+                            <li>Copie a "Project URL" e cole no campo acima</li>
+                            <li>Copie a "anon public" key e cole no campo de chave</li>
+                            <li>Execute o script SQL das tabelas no SQL Editor</li>
+                            <li>Teste a conexão e sincronize os dados</li>
+                        </ol>
                     </div>
                 </div>
             </div>
@@ -654,6 +694,7 @@
             initTheme();
             loadLocalData();
             ensureAdminUser();
+            loadSupabaseConfig();
             console.log('Sistema inicializado com sucesso');
         }
 
@@ -1394,17 +1435,195 @@
             }).join('');
         }
 
-        // Supabase functions (basic implementation)
-        function testConnection() {
+        // Supabase functions (enhanced implementation)
+        function showConnectionStatus(type, title, message, icon) {
+            const statusDiv = document.getElementById('connectionStatus');
+            const statusIcon = document.getElementById('statusIcon');
+            const statusTitle = document.getElementById('statusTitle');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            statusDiv.className = `p-4 rounded-lg border-2 ${
+                type === 'success' ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-300' :
+                type === 'error' ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-300' :
+                'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-300'
+            }`;
+            
+            statusIcon.textContent = icon;
+            statusTitle.textContent = title;
+            statusMessage.textContent = message;
+            statusDiv.classList.remove('hidden');
+        }
+
+        async function testConnection() {
+            const url = document.getElementById('supabaseUrl').value.trim();
+            const key = document.getElementById('supabaseKey').value.trim();
+            const testBtn = document.getElementById('testBtn');
+            const testBtnIcon = document.getElementById('testBtnIcon');
+            const testBtnText = document.getElementById('testBtnText');
+            
+            if (!url || !key) {
+                showConnectionStatus('error', 'Erro de Configuração', 'Por favor, preencha a URL e a chave do Supabase!', '❌');
+                return;
+            }
+            
+            // Update button to loading state
+            testBtn.disabled = true;
+            testBtnIcon.textContent = '⏳';
+            testBtnText.textContent = 'Testando...';
+            
+            try {
+                // Initialize Supabase client
+                const { createClient } = supabase;
+                const supabaseClient = createClient(url, key);
+                
+                // Test 1: Basic connection
+                showConnectionStatus('warning', 'Testando Conexão...', 'Verificando conectividade com o Supabase...', '⏳');
+                
+                // Test 2: Check if we can query users table
+                const { data, error } = await supabaseClient
+                    .from('users')
+                    .select('count', { count: 'exact', head: true });
+                
+                if (error) {
+                    throw new Error(`Erro na consulta: ${error.message}`);
+                }
+                
+                // Test 3: Check table structure
+                const { data: tableData, error: tableError } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .limit(1);
+                
+                if (tableError) {
+                    throw new Error(`Erro ao verificar estrutura: ${tableError.message}`);
+                }
+                
+                // Success
+                showConnectionStatus('success', 'Conexão Bem-Sucedida! ✅', 
+                    `Conectado ao Supabase com sucesso. Tabelas encontradas e funcionais.`, '✅');
+                
+                // Save working config
+                supabaseConfig.url = url;
+                supabaseConfig.key = key;
+                localStorage.setItem('supabaseConfig', JSON.stringify(supabaseConfig));
+                
+                // Show database info
+                await showDatabaseInfo(supabaseClient);
+                
+            } catch (error) {
+                console.error('Erro de conexão:', error);
+                showConnectionStatus('error', 'Falha na Conexão ❌', 
+                    `Erro: ${error.message}. Verifique as credenciais e se as tabelas foram criadas.`, '❌');
+            } finally {
+                // Reset button
+                testBtn.disabled = false;
+                testBtnIcon.textContent = '🔍';
+                testBtnText.textContent = 'Testar Conexão';
+            }
+        }
+
+        async function showDatabaseInfo(client) {
+            try {
+                const infoDiv = document.getElementById('databaseInfo');
+                const tablesList = document.getElementById('tablesList');
+                
+                // Check each table
+                const tables = [
+                    { name: 'users', label: 'Usuários' },
+                    { name: 'vehicles', label: 'Veículos' },
+                    { name: 'trips', label: 'Viagens' }
+                ];
+                
+                let tableInfo = '';
+                
+                for (const table of tables) {
+                    try {
+                        const { count, error } = await client
+                            .from(table.name)
+                            .select('*', { count: 'exact', head: true });
+                        
+                        if (error) throw error;
+                        
+                        tableInfo += `
+                            <div class="flex justify-between items-center p-2 bg-white dark:bg-gray-800 rounded border">
+                                <span class="font-medium">📋 ${table.label}</span>
+                                <span class="text-green-600 dark:text-green-400 font-bold">${count || 0} registros</span>
+                            </div>
+                        `;
+                    } catch (error) {
+                        tableInfo += `
+                            <div class="flex justify-between items-center p-2 bg-white dark:bg-gray-800 rounded border">
+                                <span class="font-medium">📋 ${table.label}</span>
+                                <span class="text-red-600 dark:text-red-400 font-bold">Erro</span>
+                            </div>
+                        `;
+                    }
+                }
+                
+                tablesList.innerHTML = tableInfo;
+                infoDiv.classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Erro ao obter informações do banco:', error);
+            }
+        }
+
+        async function testTables() {
             const url = document.getElementById('supabaseUrl').value.trim();
             const key = document.getElementById('supabaseKey').value.trim();
             
             if (!url || !key) {
-                alert('Por favor, preencha a URL e a chave do Supabase!');
+                showConnectionStatus('error', 'Erro de Configuração', 'Configure a conexão primeiro!', '❌');
                 return;
             }
             
-            alert('Funcionalidade de teste de conexão será implementada em versão futura.');
+            try {
+                const { createClient } = supabase;
+                const supabaseClient = createClient(url, key);
+                
+                showConnectionStatus('warning', 'Verificando Tabelas...', 'Testando estrutura do banco de dados...', '⏳');
+                
+                // Test each table structure
+                const tests = [
+                    { table: 'users', required: ['id', 'name', 'username', 'password', 'role'] },
+                    { table: 'vehicles', required: ['id', 'plate', 'brand', 'model', 'year', 'available'] },
+                    { table: 'trips', required: ['id', 'driver_id', 'vehicle_id', 'destination', 'initial_km', 'status'] }
+                ];
+                
+                let allGood = true;
+                let results = [];
+                
+                for (const test of tests) {
+                    try {
+                        const { data, error } = await supabaseClient
+                            .from(test.table)
+                            .select('*')
+                            .limit(1);
+                        
+                        if (error) throw error;
+                        
+                        results.push(`✅ Tabela '${test.table}' - OK`);
+                    } catch (error) {
+                        allGood = false;
+                        results.push(`❌ Tabela '${test.table}' - ${error.message}`);
+                    }
+                }
+                
+                if (allGood) {
+                    showConnectionStatus('success', 'Todas as Tabelas OK! ✅', 
+                        'Estrutura do banco de dados verificada com sucesso.', '✅');
+                } else {
+                    showConnectionStatus('error', 'Problemas Encontrados ❌', 
+                        'Algumas tabelas estão com problemas. Execute o script SQL completo.', '❌');
+                }
+                
+                // Show detailed results
+                console.log('Resultados dos testes:', results);
+                
+            } catch (error) {
+                showConnectionStatus('error', 'Erro no Teste ❌', 
+                    `Erro ao testar tabelas: ${error.message}`, '❌');
+            }
         }
 
         function saveConfig() {
@@ -1412,7 +1631,7 @@
             const key = document.getElementById('supabaseKey').value.trim();
             
             if (!url || !key) {
-                alert('Por favor, preencha a URL e a chave do Supabase!');
+                showConnectionStatus('error', 'Erro de Configuração', 'Preencha todos os campos antes de salvar!', '❌');
                 return;
             }
             
@@ -1420,15 +1639,89 @@
             supabaseConfig.key = key;
             
             localStorage.setItem('supabaseConfig', JSON.stringify(supabaseConfig));
-            alert('Configuração salva com sucesso!');
+            showConnectionStatus('success', 'Configuração Salva! ✅', 
+                'Credenciais salvas no navegador com sucesso.', '💾');
         }
 
-        function syncData() {
-            alert('Funcionalidade de sincronização será implementada em versão futura.');
+        async function syncData() {
+            const url = document.getElementById('supabaseUrl').value.trim();
+            const key = document.getElementById('supabaseKey').value.trim();
+            
+            if (!url || !key) {
+                showConnectionStatus('error', 'Erro de Configuração', 'Configure a conexão primeiro!', '❌');
+                return;
+            }
+            
+            try {
+                const { createClient } = supabase;
+                const supabaseClient = createClient(url, key);
+                
+                showConnectionStatus('warning', 'Sincronizando...', 'Enviando dados locais para o Supabase...', '🔄');
+                
+                let syncCount = 0;
+                
+                // Sync users (except admin)
+                for (const user of users) {
+                    if (user.username !== 'admin') {
+                        const { error } = await supabaseClient
+                            .from('users')
+                            .upsert(user, { onConflict: 'username' });
+                        
+                        if (!error) syncCount++;
+                    }
+                }
+                
+                // Sync vehicles
+                for (const vehicle of vehicles) {
+                    const { error } = await supabaseClient
+                        .from('vehicles')
+                        .upsert(vehicle, { onConflict: 'plate' });
+                    
+                    if (!error) syncCount++;
+                }
+                
+                // Sync trips
+                for (const trip of trips) {
+                    const { error } = await supabaseClient
+                        .from('trips')
+                        .upsert({
+                            ...trip,
+                            driver_id: trip.driverId,
+                            vehicle_id: trip.vehicleId,
+                            initial_km: trip.initialKm,
+                            final_km: trip.finalKm,
+                            km_traveled: trip.kmTraveled,
+                            start_time: trip.startTime,
+                            end_time: trip.endTime
+                        });
+                    
+                    if (!error) syncCount++;
+                }
+                
+                showConnectionStatus('success', 'Sincronização Concluída! ✅', 
+                    `${syncCount} registros sincronizados com sucesso.`, '✅');
+                
+            } catch (error) {
+                showConnectionStatus('error', 'Erro na Sincronização ❌', 
+                    `Erro: ${error.message}`, '❌');
+            }
+        }
+
+        // Load saved config on page load
+        function loadSupabaseConfig() {
+            const saved = localStorage.getItem('supabaseConfig');
+            if (saved) {
+                const config = JSON.parse(saved);
+                document.getElementById('supabaseUrl').value = config.url || '';
+                document.getElementById('supabaseKey').value = config.key || '';
+                supabaseConfig = config;
+            }
         }
 
         // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', initApp);
+        document.addEventListener('DOMContentLoaded', function() {
+            initApp();
+        });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97e217e63302dcd8',t:'MTc1NzcwODI5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97e22e78b1d44468',t:'MTc1NzcwOTIyNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
