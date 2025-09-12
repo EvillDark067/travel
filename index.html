@@ -378,26 +378,29 @@
         }
 
         // Função para carregar e exibir lista de usuários
-        function carregarUsuarios() {
-            const usersList = document.getElementById('usersList');
-            usersList.innerHTML = '';
-            
-            usuarios.forEach((usuario, index) => {
-                const userCard = document.createElement('div');
-                userCard.className = 'bg-gray-50 rounded-lg p-4 flex justify-between items-center';
-                userCard.innerHTML = `
-                    <div>
-                        <h4 class="font-medium text-gray-800">${usuario.username}</h4>
-                        <p class="text-sm text-gray-600">Perfil: ${usuario.role}</p>
-                    </div>
-                    <button onclick="removerUsuario(${index})" class="text-red-600 hover:text-red-800 transition-colors">
-                        <i data-lucide="user-minus" class="w-4 h-4"></i>
-                    </button>
-                `;
-                usersList.appendChild(userCard);
-            });
-            lucide.createIcons();
-        }
+       async function carregarUsuarios() {
+    const usersList = document.getElementById('usersList');
+    usersList.innerHTML = '';
+
+    const usuarios = await carregarUsuariosSupabase();
+
+    usuarios.forEach(usuario => {
+        const userCard = document.createElement('div');
+        userCard.className = 'bg-gray-50 rounded-lg p-4 flex justify-between items-center';
+        userCard.innerHTML = `
+            <div>
+                <h4 class="font-medium text-gray-800">${usuario.username}</h4>
+                <p class="text-sm text-gray-600">Perfil: ${usuario.role}</p>
+            </div>
+            <button onclick="removerUsuario('${usuario.id}')" class="text-red-600 hover:text-red-800 transition-colors">
+                <i data-lucide="user-minus" class="w-4 h-4"></i>
+            </button>
+        `;
+        usersList.appendChild(userCard);
+    });
+    lucide.createIcons();
+}
+
 
         // Função para criar novo usuário
         function criarUsuario(username, password) {
@@ -417,17 +420,18 @@
         }
 
         // Função para remover usuário pelo índice
-        function removerUsuario(index) {
-            if (usuarios[index].username === usuarioLogado.username) {
-                alert('Você não pode remover seu próprio usuário!');
-                return;
-            }
-            
-            if (confirm('Tem certeza que deseja remover este usuário?')) {
-                usuarios.splice(index, 1);
-                carregarUsuarios();
-            }
-        }
+       async function removerUsuario(id) {
+    const { error } = await supabaseClient
+        .from('usuarios')
+        .delete()
+        .eq('id', id);
+
+    if (!error) {
+        carregarUsuarios();
+    } else {
+        console.error('Erro ao remover usuário:', error);
+    }
+}
 
         // Função para alterar senha do usuário logado
         function alterarSenha(senhaAtual, novaSenha) {
