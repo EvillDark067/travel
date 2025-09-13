@@ -435,11 +435,19 @@
         </div>
     </div>
 
-    <script>
-        // Supabase Configuration
-        const supabaseUrl = "https://selxmiekvyiqqgfcvhzy.supabase.co";
-        const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlbHhtaWVrdnlpcXFnZmN2aHp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3MzExNzAsImV4cCI6MjA3MzMwNzE3MH0.WPJ0fltKZBz6epGsAiKq_4M3ptELw0Em8caV-2n84wc";
-        const supabase = supabasejs.createClient(supabaseUrl, supabaseKey);
+     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+    <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+
+    // 🔑 Configure aqui a URL e a Anon Key do seu projeto
+    const SUPABASE_URL = "https://xqckqyvmzagkotyzwjbj.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxY2txeXZtemFna290eXp3amJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3MTk4NjcsImV4cCI6MjA3MzI5NTg2N30.eXVAEVoSrMrVu23GKMBnQ7iFIrfEXpZexS7hioIeCH0";
+    
+    export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+</script>
+<script>
 
         // Global Variables
         let currentUser = null;
