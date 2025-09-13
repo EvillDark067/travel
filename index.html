@@ -6,7 +6,23 @@
     <title>Controle de Viagens</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
 <body class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
     <!-- Theme Toggle -->
@@ -418,7 +434,10 @@
         </div>
     </div>
 
-     <script type="module">
+     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+    <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
     // 🔑 Configure aqui a URL e a Anon Key do seu projeto
@@ -426,28 +445,8 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxY2txeXZtemFna290eXp3amJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3MTk4NjcsImV4cCI6MjA3MzI5NTg2N30.eXVAEVoSrMrVu23GKMBnQ7iFIrfEXpZexS7hioIeCH0";
     
     export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-
-// === Código JS Principal ===
-
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#eff6ff',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8'
-                        }
-                    }
-                }
-            }
-        }
-    
-
-
+</script>
+<script>
 
         // Global Variables
         let currentUser = null;
@@ -995,13 +994,11 @@
                     }
                 ];
 
-                let csv = 'Motorista,Veículo,Destino,Início,Fim,KM Inicial,KM Final,KM Percorrido
-';
+                let csv = 'Motorista,Veículo,Destino,Início,Fim,KM Inicial,KM Final,KM Percorrido\n';
                 
                 tripsData.forEach(trip => {
                     const kmPercorrido = trip.final_km - trip.initial_km;
-                    csv += `"${trip.users.name}","${trip.vehicles.plate} - ${trip.vehicles.brand} ${trip.vehicles.model}","${trip.destination}","${new Date(trip.start_time).toLocaleString('pt-BR')}","${new Date(trip.end_time).toLocaleString('pt-BR')}",${trip.initial_km},${trip.final_km},${kmPercorrido}
-`;
+                    csv += `"${trip.users.name}","${trip.vehicles.plate} - ${trip.vehicles.brand} ${trip.vehicles.model}","${trip.destination}","${new Date(trip.start_time).toLocaleString('pt-BR')}","${new Date(trip.end_time).toLocaleString('pt-BR')}",${trip.initial_km},${trip.final_km},${kmPercorrido}\n`;
                 });
 
                 const blob = new Blob([csv], { type: 'text/csv' });
@@ -1357,12 +1354,8 @@
 
         // Initialize the application
         showScreen('loginScreen');
-    
-
-(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97e45b9f07d7a623',t:'MTc1NzczMjA0NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();
-</script>
-
+    </script>
 
     
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97e45b9f07d7a623',t:'MTc1NzczMjA0NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
