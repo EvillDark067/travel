@@ -701,7 +701,7 @@ function initSupabase(){
                     </div>
                 </div>
 
-                <!-- Tables Tab
+                <!-- Tables Tab -->
                 <div id="tablesContent" class="hidden">
                     <div class="space-y-6">
                         <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
@@ -776,7 +776,7 @@ ALTER TABLE trips DISABLE ROW LEVEL SECURITY;</code></pre>
                 </div>
             </div>
         </div>
-    </div> -->
+    </div>
 
     <!-- Trip Status Screen -->
     <div id="tripStatusScreen" class="hidden min-h-screen p-4">
@@ -2039,15 +2039,22 @@ function initSupabase(){
 
     </script>
     
-     <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script>
+  // Cria o cliente Supabase
+  const supabase = window.supabase.createClient(
+    "https://xqckqyvmzagkotyzwjbj.supabase.co",   // 🔑 URL do seu projeto
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxY2txeXZtemFna290eXp3amJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3MTk4NjcsImV4cCI6MjA3MzI5NTg2N30.eXVAEVoSrMrVu23GKMBnQ7iFIrfEXpZexS7hioIeCH0"                   // 🔑 Anon key (pública)
+  );
 
-    // 🔑 Configure aqui a URL e a Anon Key do seu projeto
-    const SUPABASE_URL = "https://xqckqyvmzagkotyzwjbj.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxY2txeXZtemFna290eXp3amJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3MTk4NjcsImV4cCI6MjA3MzI5NTg2N30.eXVAEVoSrMrVu23GKMBnQ7iFIrfEXpZexS7hioIeCH0";
-    
-    export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // Exemplo de insert
+  async function inserir() {
+    let { data, error } = await supabase
+      .from("sua_tabela")
+      .insert([{ coluna1: "teste", coluna2: 123 }]);
+    console.log(data, error);
+  }
+  inserir();
 </script>
 
-</body>
-</html>
+
