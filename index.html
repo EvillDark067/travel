@@ -7,6 +7,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
+function initSupabase(){
+ if(supabaseConfig.url && supabaseConfig.key){
+   supabase = window.supabase.createClient(supabaseConfig.url, supabaseConfig.key);
+ }
+}
+
         tailwind.config = {
             darkMode: 'class',
         }
@@ -879,6 +885,12 @@ ALTER TABLE trips DISABLE ROW LEVEL SECURITY;</code></pre>
     </div>
 
     <script>
+function initSupabase(){
+ if(supabaseConfig.url && supabaseConfig.key){
+   supabase = window.supabase.createClient(supabaseConfig.url, supabaseConfig.key);
+ }
+}
+
         // Global variables
         let currentUser = null;
         let users = [
@@ -2026,10 +2038,7 @@ ALTER TABLE trips DISABLE ROW LEVEL SECURITY;</code></pre>
         
 
     </script>
-
-   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-
+    
     <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
@@ -2040,5 +2049,11 @@ ALTER TABLE trips DISABLE ROW LEVEL SECURITY;</code></pre>
     export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 </script>
 
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97e1ece1f5d09da8',t:'MTc1NzcwNjUzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>
+function initSupabase(){
+ if(supabaseConfig.url && supabaseConfig.key){
+   supabase = window.supabase.createClient(supabaseConfig.url, supabaseConfig.key);
+ }
+}
+(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97e1ece1f5d09da8',t:'MTc1NzcwNjUzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
